@@ -44,7 +44,8 @@ def generate_markdown_report(
     findings: list[Finding],
     sl_scores: dict,
     consultant_name: str = "IndusProbe Assessment Engine",
-    report_version: str = "v1.1-demonstrator",
+    report_version: str = "v1.1-assessment",
+    mode: str = "ASSESSMENT",
 ) -> str:
 
     findings_sorted = sorted(findings, key=lambda f: _SEVERITY_ORDER.get(f.severity, 99))
@@ -57,41 +58,74 @@ def generate_markdown_report(
     low_count      = sum(1 for f in findings if f.severity == "LOW")
     info_count     = sum(1 for f in findings if f.severity == "INFO")
 
+    write_sessions = [s for s in sessions if s.get("is_write") is True or s.get("write_count", 0) > 0]
+
     lines: list[str] = []
 
     # -----------------------------------------------------------------------
-    # Cover Page & Prominent Demonstrator Notice
+    # Cover Page & Notice
     # -----------------------------------------------------------------------
-    lines += [
-        f"# OT Network Passive Assessment & IEC 62443 Technical Analysis",
-        f"",
-        f"> ⚠️ **DEMONSTRATION REPORT — SYNTHETIC / LAB-GENERATED TRAFFIC**  ",
-        f"> Fictional cement manufacturing environment. Not an assessment of an actual customer installation.  ",
-        f"> Findings demonstrate analytical workflows and do not establish real-world asset vulnerabilities.",
-        f"",
-        f"| Metadata Field | Value |",
-        f"|----------------|-------|",
-        f"| **Facility / Context** | {client_name} |",
-        f"| **Simulated Unit** | {site_location} |",
-        f"| **Assessment Date** | {engagement_date} |",
-        f"| **Capture Telemetry** | {capture_duration} |",
-        f"| **Total Packets Analysed** | {total_packets:,} Ethernet frames |",
-        f"| **Engine & Author** | {consultant_name} |",
-        f"| **Reviewer Status** | Draft — Subject to Engineering Review |",
-        f"| **Document Version** | {report_version} |",
-        f"| **Contact** | `contact@indusprobe.internal` |",
-        f"| **Classification** | DEMONSTRATION ONLY — Non-Operational Synthetic Data |",
-        f"",
-        f"---",
-        f"",
-        f"> **Analytical Methodology**: The assessment component did not initiate active probes. ",
-        f"> Traffic generation/replay used to construct the lab dataset is documented separately. ",
-        f"> Zero active packets were transmitted into any operational or simulated OT segment. ",
-        f"> All technical observations are derived from passive packet header and application payload decoding.",
-        f"",
-        f"---",
-        f"",
-    ]
+    if mode.upper() == "DEMO":
+        lines += [
+            f"# OT Network Passive Assessment & IEC 62443 Technical Analysis",
+            f"",
+            f"> ⚠️ **DEMONSTRATION REPORT — SYNTHETIC / LAB-GENERATED TRAFFIC**  ",
+            f"> Fictional cement manufacturing environment. Not an assessment of an actual customer installation.  ",
+            f"> Findings demonstrate analytical workflows and do not establish real-world asset vulnerabilities.",
+            f"",
+            f"| Metadata Field | Value |",
+            f"|----------------|-------|",
+            f"| **Facility / Context** | {client_name} |",
+            f"| **Simulated Unit** | {site_location} |",
+            f"| **Assessment Date** | {engagement_date} |",
+            f"| **Capture Telemetry** | {capture_duration} |",
+            f"| **Total Packets Analysed** | {total_packets:,} Ethernet frames |",
+            f"| **Engine & Author** | {consultant_name} |",
+            f"| **Reviewer Status** | Draft — Subject to Engineering Review |",
+            f"| **Document Version** | {report_version} |",
+            f"| **Contact** | `contact@indusprobe.internal` |",
+            f"| **Classification** | DEMONSTRATION ONLY — Non-Operational Synthetic Data |",
+            f"",
+            f"---",
+            f"",
+            f"> **Analytical Methodology**: The assessment component did not initiate active probes. ",
+            f"> Traffic generation/replay used to construct the lab dataset is documented separately. ",
+            f"> Zero active packets were transmitted into any operational or simulated OT segment. ",
+            f"> All technical observations are derived from passive packet header and application payload decoding.",
+            f"",
+            f"---",
+            f"",
+        ]
+    else:
+        lines += [
+            f"# Industrial OT Network Passive Visibility & Telemetry Assessment",
+            f"",
+            f"> ℹ️ **PASSIVE LISTEN-ONLY ASSESSMENT — ZERO ACTIVE TRANSMISSION**  ",
+            f"> This assessment was conducted exclusively via passive network monitoring and packet analysis.  ",
+            f"> Zero packets were transmitted or injected into any operational control system or field network.  ",
+            f"> **Pilot Scope**: Validated baseline strictly bounded to Schneider Electric (Modbus TCP / UMAS subset) and Rockwell Automation (EtherNet/IP / CIP subset).",
+            f"",
+            f"| Metadata Field | Value |",
+            f"|----------------|-------|",
+            f"| **Facility / Context** | {client_name} |",
+            f"| **Target Unit / Segment** | {site_location} |",
+            f"| **Assessment Date** | {engagement_date} |",
+            f"| **Capture Telemetry** | {capture_duration} |",
+            f"| **Total Packets Analysed** | {total_packets:,} Ethernet frames |",
+            f"| **Assessment Engine** | {consultant_name} |",
+            f"| **Reviewer Status** | Pending Analyst Engineering Review |",
+            f"| **Document Version** | {report_version} |",
+            f"| **Classification** | CONFIDENTIAL — Operational Technology Assessment |",
+            f"| **Pilot Scope Target** | Schneider Electric & Rockwell Automation Baseline |",
+            f"",
+            f"---",
+            f"",
+            f"> **Analytical Methodology**: Purely passive listen-only capture. All technical observations are derived ",
+            f"> from physical packet headers, protocol state, and application payload decoding without intrusive probing.",
+            f"",
+            f"---",
+            f"",
+        ]
 
     # -----------------------------------------------------------------------
     # 1. Executive Summary
@@ -132,10 +166,10 @@ def generate_markdown_report(
         f"",
         f"Passive packet capture accounted for **{total_packets:,} total Ethernet frames** across {len(sessions)} distinct communication flows:",
         f"",
-        f"- **Asset Coverage**: {len(assets)} unique assets ({len(ot_assets)} OT controllers/devices in lab manifest, {len(it_assets)} unclassified endpoints absent from reference inventory).",
-        f"- **Protocol Metrics**: {len(protocol_stats)} distinct protocols observed. Counts represent exact non-overlapping frame totals.",
-        f"- **Process Control Write Activity**: Deep Packet Inspection (DPI) identified **3 distinct write-bearing command function codes** (Modbus FC16 Write Multiple Registers, Modbus FC06 Write Single Register, and HART-IP Command 6 Write Polling Address) across 7 active write communication sessions.",
-        f"- **Control Separation**: Distinguishes valid process control baselines (e.g., M580 PLC commanding Kiln VFD) from unverified external control commands (e.g., Unregistered Dispatch PC writing to Packaging PLC).",
+        f"- **Asset Coverage**: {len(assets)} unique assets ({len(ot_assets)} OT controllers/devices identified, {len(it_assets)} unclassified endpoints).",
+        f"- **Protocol Metrics**: {len(protocol_stats)} distinct protocols observed.",
+        f"- **Process Control Write Activity**: Deep Packet Inspection (DPI) identified **{len(write_sessions)} active write-bearing communication session(s)**.",
+        f"- **Control Separation**: Distinguishes valid process control baselines from unverified or external control commands.",
         f"",
     ]
 
@@ -152,7 +186,11 @@ def generate_markdown_report(
     # 2. Asset Inventory & Purdue Asset Grouping Diagram
     # -----------------------------------------------------------------------
     purdue_svg = generate_svg_purdue_diagram(assets, sessions, findings)
-    grouped_cves = lookup_cves_for_assets(assets)
+
+    if mode.upper() == "DEMO":
+        grouped_cves = lookup_cves_for_assets(assets)
+    else:
+        grouped_cves = []
 
     lines += [
         f"---",
@@ -160,33 +198,36 @@ def generate_markdown_report(
         f"## 2. Asset Inventory (Passive Discovery)",
         f"",
         f"The following assets were identified from passive traffic inspection. Endpoints marked ⚠️ were **not** in the ",
-        f"lab reference inventory and require physical confirmation before applying isolation rules.",
+        f"reference inventory and require physical confirmation before applying isolation rules.",
         f"",
-        f"| # | IP Address | MAC Address | Vendor | Device Type / Role | Purdue Level | Protocols Seen | Identity Source | Registry Status |",
-        f"|---|------------|-------------|--------|--------------------|--------------|----------------|-----------------|-----------------|",
+        f"| # | IP Address | MAC Address | Observed Vendor | Model / Product Code | Identification Evidence | Confidence | Purdue Level | Protocols Seen | Registry Status |",
+        f"|---|------------|-------------|-----------------|----------------------|-------------------------|------------|--------------|----------------|-----------------|",
     ]
 
     for i, asset in enumerate(sorted(assets, key=lambda a: a.get("purdue_level", "")), 1):
         in_reg = "✅ Registered" if asset.get("in_client_inventory", True) else "⚠️ **NOT IN REGISTRY**"
         protos = ", ".join(asset.get("protocols_seen", [])) or "—"
-        id_source = asset.get("identity_source", "Supplied by lab manifest")
+        vendor = asset.get("observed_vendor") or asset.get("vendor") or "Unknown"
+        model = asset.get("observed_model") or asset.get("device_hint") or "—"
+        evidence = asset.get("identity_evidence", "OUI_INFERENCE")
+        confidence = asset.get("confidence", "MEDIUM")
         lines.append(
-            f"| {i} | `{asset['ip']}` | `{asset['mac']}` | {asset['vendor']} | "
-            f"{asset['device_hint']} | {asset['purdue_level']} | {protos} | {id_source} | {in_reg} |"
+            f"| {i} | `{asset['ip']}` | `{asset['mac']}` | {vendor} | "
+            f"{model} | {evidence} | {confidence} | {asset['purdue_level']} | {protos} | {in_reg} |"
         )
 
     lines += [
         f"",
-        f"### 2.1 Purdue-Level Asset Grouping (Observed vs Reference Manifest)",
+        f"### 2.1 Purdue-Level Asset Grouping",
         f"",
-        f"Below is the automated Purdue structural asset map generated from passive packet traces and reference manifest data.",
+        f"Below is the automated Purdue structural asset map generated from passive packet traces and reference inventory data.",
         f"Devices are color-coded: 🔴 **Red** (Unregistered endpoint / Critical attention), 🟡 **Yellow** (Attention required), 🟢 **Green** (No selected findings observed).",
         f"",
         purdue_svg,
         f"",
     ]
 
-    if grouped_cves:
+    if mode.upper() == "DEMO" and grouped_cves:
         lines += [
             f"### 2.2 Vendor-Specific Hardware Vulnerabilities (CISA / Authoritative Advisory Cross-Reference)",
             f"",
@@ -204,6 +245,16 @@ def generate_markdown_report(
                 f"{c['mitigation']} | {affected_str} |"
             )
         lines.append("")
+    else:
+        lines += [
+            f"### 2.2 Known Vulnerability & Advisory Correlation Status",
+            f"",
+            f"> ℹ️ **AUTOMATED ADVISORY EVALUATION NOT ENABLED**  ",
+            f"> Automated vulnerability correlation and CSAF advisory evaluation are disabled for this passive assessment.  ",
+            f"> Conclusively matching CVEs to operational OT controllers requires verified firmware versions, hardware revisions, ",
+            f"> and manual engineering walkdowns. Unverified version assumptions are omitted to prevent misinformed operational decisions.",
+            f"",
+        ]
 
     # -----------------------------------------------------------------------
     # 3. Protocol Map
@@ -214,6 +265,18 @@ def generate_markdown_report(
         f"",
         f"## 3. OT Protocol Map",
         f"",
+    ]
+
+    if mode.upper() != "DEMO":
+        lines += [
+            f"> ℹ️ **SCOPED PILOT TARGET — PROTOCOL CLASSIFICATION**  ",
+            f"> Validated parsing and operation classification are strictly bounded to Schneider Electric (Modbus TCP / UMAS subset) ",
+            f"> and Rockwell Automation (EtherNet/IP / CIP subset).  ",
+            f"> Additional protocol traffic (Siemens S7, DNP3, HART-IP, OPC-UA, etc.) is catalogued as observed network telemetry only.",
+            f"",
+        ]
+
+    lines += [
         f"| Protocol | Packets | Share | Risk Level | Encryption / Cryptographic Protection | Authentication Mechanism |",
         f"|----------|---------|-------|------------|---------------------------------------|--------------------------|",
     ]
@@ -405,38 +468,67 @@ def generate_markdown_report(
         f"",
         f"Complete list of communication flows observed during passive capture (reconciles with total packet count):",
         f"",
-        f"| # | Source | Destination | Protocol | Packets | Write Operation? | Control Context |",
-        f"|---|--------|-------------|----------|---------|------------------|-----------------|",
     ]
 
-    for i, sess in enumerate(sessions, 1):
-        if sess.get("is_write") is True:
-            write = "⚠️ YES (Write)"
-        elif sess.get("is_write") is False:
-            write = "No (Read-Only)"
-        else:
-            write = "Not determined"
+    if mode.upper() == "DEMO":
+        lines += [
+            f"| # | Source | Destination | Protocol | Packets | Write Operation? | Control Context |",
+            f"|---|--------|-------------|----------|---------|------------------|-----------------|",
+        ]
+        for i, sess in enumerate(sessions, 1):
+            if sess.get("is_write") is True:
+                write = "⚠️ YES (Write)"
+            elif sess.get("is_write") is False:
+                write = "No (Read-Only)"
+            else:
+                write = "Not determined"
 
-        src = sess['src_ip']
-        dst = sess['dst_ip']
-        proto = sess['protocol']
-        context = sess.get('control_context', 'Supervisory / Field Communication')
+            src = sess['src_ip']
+            dst = sess['dst_ip']
+            proto = sess['protocol']
+            context = sess.get('control_context', 'Supervisory / Field Communication')
 
-        lines.append(
-            f"| {i} | `{src}:{sess['src_port']}` | "
-            f"`{dst}:{sess['dst_port']}` | "
-            f"{proto} | {sess['packet_count']:,} | {write} | {context} |"
-        )
+            lines.append(
+                f"| {i} | `{src}:{sess['src_port']}` | "
+                f"`{dst}:{sess['dst_port']}` | "
+                f"{proto} | {sess['packet_count']:,} | {write} | {context} |"
+            )
+        lines += [
+            f"",
+            f"*Total Reconciled Frames in Appendix: {sum(s['packet_count'] for s in sessions):,}*",
+            f"",
+            f"---",
+            f"",
+            f"*Demonstration report generated by **IndusProbe v1.1-demonstrator** — Industrial OT Passive Scanner & IEC 62443 Analyser*",
+            f"*Notice: Synthetic dataset for technology demonstration purposes only.*",
+        ]
+    else:
+        lines += [
+            f"| # | Source Endpoint | Destination Endpoint | Protocol & Port | Total Packets | Read PDUs | Write PDUs | Undecoded / Unsupported | Session Classification |",
+            f"|---|-----------------|----------------------|-----------------|---------------|-----------|------------|-------------------------|------------------------|",
+        ]
+        for i, sess in enumerate(sessions, 1):
+            src = f"`{sess['src_ip']}:{sess['src_port']}`"
+            dst = f"`{sess['dst_ip']}:{sess['dst_port']}`"
+            proto = f"{sess['protocol']}"
+            pkts = f"{sess['packet_count']:,}"
+            reads = f"{sess.get('read_count', 0):,}"
+            writes = f"{sess.get('write_count', 0):,}"
+            undec = f"{(sess.get('undecoded_count', 0) + sess.get('unsupported_count', 0)):,}"
+            cls_name = sess.get('classification', 'WRITE_OR_CONTROL' if sess.get('is_write') else 'READ_ONLY')
 
-    lines += [
-        f"",
-        f"*Total Reconciled Frames in Appendix: {sum(s['packet_count'] for s in sessions):,}*",
-        f"",
-        f"---",
-        f"",
-        f"*Demonstration report generated by **IndusProbe v1.1-demonstrator** — Industrial OT Passive Scanner & IEC 62443 Analyser*",
-        f"*Notice: Synthetic dataset for technology demonstration purposes only.*",
-    ]
+            lines.append(
+                f"| {i} | {src} | {dst} | {proto} | {pkts} | {reads} | {writes} | {undec} | `{cls_name}` |"
+            )
+        lines += [
+            f"",
+            f"*Total Reconciled Frames in Appendix: {sum(s['packet_count'] for s in sessions):,}*",
+            f"",
+            f"---",
+            f"",
+            f"*Assessment report generated by **IndusProbe v1.1** — Industrial OT Passive Visibility & Assessment Engine*  ",
+            f"*Notice: Listen-only passive inspection. Bounded to Schneider Electric and Rockwell Automation pilot baseline.*",
+        ]
 
     return "\n".join(lines)
 

@@ -72,8 +72,12 @@ class ProtocolObservation:
     dst_mac: str = ""
     function_code: int | None = None
     function_name: str = ""
-    is_write: bool = False          # True = write/command to device (higher risk)
-    is_authenticated: bool = False  # Does this session show auth exchange?
+    operation_type: str = "UNDECODED"  # READ, WRITE, SESSION_MGMT, ROUTING, UNSUPPORTED, UNDECODED
+    is_write: bool | None = False      # True = confirmed write, False = confirmed read, None = unverified/unsupported
+    is_authenticated: bool = False     # Does this session show auth exchange?
+    observed_vendor: str | None = None
+    observed_model: str | None = None
+    vendor_evidence: str = "NONE"       # CIP_IDENTITY, MODBUS_DEVICE_ID, UMAS_DECODE, NONE
     details: dict = field(default_factory=dict)
     packet_count: int = 1
 
@@ -94,28 +98,126 @@ def _parse_modbus(payload: bytes) -> dict | None:
     if proto_id != 0x0000:
         return None
 
-    _FC_NAMES = {
-        1:  "Read Coils",
-        2:  "Read Discrete Inputs",
-        3:  "Read Holding Registers",
-        4:  "Read Input Registers",
-        5:  "Write Single Coil",
-        6:  "Write Single Register",
-        15: "Write Multiple Coils",
-        16: "Write Multiple Registers",
-        17: "Report Slave ID",
-        23: "Read/Write Multiple Registers",
-        43: "Read Device Identification",
-        90: "Encapsulated Transport (Modicon Unity)",
+    _STD_FCS = {
+        1:  ("Read Coils", "READ", False),
+        2:  ("Read Discrete Inputs", "READ", False),
+        3:  ("Read Holding Registers", "READ", False),
+        4:  ("Read Input Registers", "READ", False),
+        5:  ("Write Single Coil", "WRITE", True),
+        6:  ("Write Single Register", "WRITE", True),
+        15: ("Write Multiple Coils", "WRITE", True),
+        16: ("Write Multiple Registers", "WRITE", True),
+        17: ("Report Slave ID", "READ", False),
+        22: ("Mask Write Register", "WRITE", True),
+        23: ("Read/Write Multiple Registers", "WRITE", True),
     }
-    _WRITE_FCS = {5, 6, 15, 16, 22, 23}
 
+    # FC 43 (0x2B): Read Device Identification (Encapsulated Interface Transport)
+    if fc == 43:
+        details = {
+            "transaction_id": tid,
+            "unit_id": unit_id,
+            "function_code": fc,
+            "function_name": "Read Device Identification",
+            "operation_type": "READ",
+            "is_write": False,
+            "length": length,
+            "vendor_evidence": "MODBUS_DEVICE_ID",
+        }
+        # Parse MEI response objects if available
+        # Header: MEI Type (1B, 0x0E), Read Device ID (1B), Conformity (1B), More (1B), Next (1B), Num Objects (1B)
+        if len(payload) > 14 and payload[8] == 0x0E:
+            try:
+                num_objs = payload[13]
+                idx = 14
+                for _ in range(num_objs):
+                    if idx + 2 > len(payload):
+                        break
+                    obj_id = payload[idx]
+                    obj_len = payload[idx + 1]
+                    idx += 2
+                    if idx + obj_len > len(payload):
+                        break
+                    val = payload[idx:idx + obj_len].decode("latin-1", errors="replace").strip()
+                    idx += obj_len
+                    if obj_id == 0:
+                        details["observed_vendor"] = val
+                    elif obj_id == 1:
+                        details["observed_model"] = val
+                    elif obj_id == 2:
+                        details["observed_firmware"] = val
+            except Exception:
+                pass
+        return details
+
+    # FC 90 (0x5A): Schneider UMAS (Modicon Unity/M340/M580 proprietary service)
+    if fc == 90:
+        umas_code = payload[8] if len(payload) > 8 else None
+        _UMAS_FUNCTIONS = {
+            0x01: ("UMAS Init Communication / Assign Session", "SESSION_MGMT", False),
+            0x02: ("UMAS Read Memory Block / Read PLC Info", "READ", False),
+            0x03: ("UMAS Read Internal Bits / Registers", "READ", False),
+            0x04: ("UMAS Write Internal Bits / Registers", "WRITE", True),
+            0x06: ("UMAS Read System Bits", "READ", False),
+            0x07: ("UMAS Write System Bits", "WRITE", True),
+            0x20: ("UMAS Read Memory Card / Backup", "READ", False),
+            0x22: ("UMAS Read Project Info", "READ", False),
+            0x24: ("UMAS Read Variable Info", "READ", False),
+            0x30: ("UMAS Read Executive / Hardware ID", "READ", False),
+            0x50: ("UMAS Stop PLC", "WRITE", True),
+            0x58: ("UMAS Start PLC", "WRITE", True),
+        }
+
+        if umas_code in _UMAS_FUNCTIONS:
+            fname, op_type, is_wr = _UMAS_FUNCTIONS[umas_code]
+            return {
+                "transaction_id": tid,
+                "unit_id": unit_id,
+                "function_code": fc,
+                "umas_code": umas_code,
+                "function_name": fname,
+                "operation_type": op_type,
+                "is_write": is_wr,
+                "length": length,
+                "observed_vendor": "Schneider Electric",
+                "vendor_evidence": "UMAS_DECODE",
+            }
+        else:
+            # Explicitly mark unsupported UMAS operations as unknown/unsupported, NOT read-only
+            sub_hex = f"0x{umas_code:02X}" if umas_code is not None else "Truncated"
+            return {
+                "transaction_id": tid,
+                "unit_id": unit_id,
+                "function_code": fc,
+                "umas_code": umas_code,
+                "function_name": f"UMAS Unsupported Subcommand ({sub_hex})",
+                "operation_type": "UNSUPPORTED",
+                "is_write": None,  # Not read-only
+                "length": length,
+                "observed_vendor": "Schneider Electric",
+                "vendor_evidence": "UMAS_DECODE",
+            }
+
+    if fc in _STD_FCS:
+        fname, op_type, is_wr = _STD_FCS[fc]
+        return {
+            "transaction_id": tid,
+            "unit_id": unit_id,
+            "function_code": fc,
+            "function_name": fname,
+            "operation_type": op_type,
+            "is_write": is_wr,
+            "length": length,
+        }
+
+    # Unsupported Modbus function code
     return {
         "transaction_id": tid,
         "unit_id": unit_id,
         "function_code": fc,
-        "function_name": _FC_NAMES.get(fc, f"FC{fc}"),
-        "is_write": fc in _WRITE_FCS,
+        "function_name": f"Modbus Unsupported Function Code ({fc})",
+        "operation_type": "UNSUPPORTED",
+        "is_write": None,  # Not read-only
         "length": length,
     }
 
@@ -164,9 +266,11 @@ def _parse_s7(payload: bytes) -> dict | None:
 
 def _parse_enip(payload: bytes) -> dict | None:
     """
-    EtherNet/IP encapsulation header:
+    EtherNet/IP encapsulation header (24 bytes):
       Command (2) + Length (2) + Session Handle (4)
       + Status (4) + Sender Context (8) + Options (4)
+    Followed by encapsulated command data (CPF or ListIdentity).
+    Purely passive — never injects packets.
     """
     if len(payload) < 24:
         return None
@@ -174,25 +278,154 @@ def _parse_enip(payload: bytes) -> dict | None:
     cmd, length, session, status = struct.unpack("<HHII", payload[:12])
 
     _ENIP_CMDS = {
-        0x0004: "List Services",
-        0x0063: "List Identity",
-        0x0064: "List Interfaces",
-        0x0065: "Register Session",
-        0x0066: "Unregister Session",
-        0x0070: "Send RR Data (Explicit Msg)",
-        0x006F: "Send Unit Data (Implicit I/O)",
+        0x0004: ("List Services", "SESSION_MGMT", False),
+        0x0063: ("List Identity", "READ", False),
+        0x0064: ("List Interfaces", "SESSION_MGMT", False),
+        0x0065: ("Register Session", "SESSION_MGMT", False),
+        0x0066: ("Unregister Session", "SESSION_MGMT", False),
+        0x006F: ("Send RR Data", "CIP_ENCAP", None),
+        0x0070: ("Send Unit Data", "CIP_ENCAP", None),
     }
     if cmd not in _ENIP_CMDS:
         return None
 
-    _WRITE_CMDS = {0x0070, 0x006F}
-
-    return {
+    cmd_name, base_op, is_wr = _ENIP_CMDS[cmd]
+    details: dict = {
         "command": cmd,
-        "command_name": _ENIP_CMDS.get(cmd, f"CMD-{cmd:#06x}"),
+        "command_name": cmd_name,
+        "function_name": cmd_name,
         "session_handle": session,
-        "is_write": cmd in _WRITE_CMDS,
+        "status": status,
+        "length": length,
+        "operation_type": base_op,
+        "is_write": is_wr,
+        "cip_decoded": False,
     }
+
+    # List Identity (0x0063) response decoding
+    if cmd == 0x0063:
+        details["operation_type"] = "READ"
+        details["is_write"] = False
+        if len(payload) >= 30:
+            try:
+                # CPF starts at byte 24: Item Count (uint16)
+                item_count = struct.unpack("<H", payload[24:26])[0]
+                idx = 26
+                for _ in range(item_count):
+                    if idx + 4 > len(payload):
+                        break
+                    item_type, item_len = struct.unpack("<HH", payload[idx:idx + 4])
+                    idx += 4
+                    if item_type == 0x000C:  # Identity Item
+                        data = payload[idx:idx + item_len]
+                        # Identity item layout:
+                        # 0..1: Encapsulation version (2B)
+                        # 2..17: Socket Address (16B)
+                        # 18..19: Vendor ID (2B uint16 LE) -> 1 = Rockwell Automation
+                        # 20..21: Device Type (2B uint16 LE)
+                        # 22..23: Product Code (2B uint16 LE)
+                        # 24: Revision Major (1B), 25: Revision Minor (1B)
+                        # 26..27: Status (2B uint16 LE)
+                        # 28..31: Serial Number (4B uint32 LE)
+                        # 32: Product Name Length (1B)
+                        # 33..: Product Name String
+                        if len(data) >= 33:
+                            vendor_id, dev_type, prod_code, rev_maj, rev_min, dev_status, serial = struct.unpack(
+                                "<HHHBBHI", data[18:32]
+                            )
+                            name_len = data[32]
+                            prod_name = data[33:33 + name_len].decode("latin-1", errors="replace").strip()
+                            details["vendor_id"] = vendor_id
+                            details["device_type"] = dev_type
+                            details["product_code"] = prod_code
+                            details["revision"] = f"{rev_maj}.{rev_min}"
+                            details["serial_number"] = f"0x{serial:08X}"
+                            details["product_name"] = prod_name
+                            if vendor_id == 1:
+                                details["observed_vendor"] = "Rockwell Automation"
+                                details["observed_model"] = prod_name or "Allen-Bradley Controller"
+                                details["observed_firmware"] = f"v{rev_maj}.{rev_min}"
+                                details["vendor_evidence"] = "CIP_IDENTITY"
+                            elif prod_name:
+                                details["observed_model"] = prod_name
+                                details["vendor_evidence"] = "CIP_IDENTITY"
+                    idx += item_len
+            except Exception:
+                pass
+        return details
+
+    # CIP Encapsulation: SendRRData (0x006F) & SendUnitData (0x0070)
+    if cmd in (0x006F, 0x0070):
+        # Encap Header (24B) + Interface Handle (4B) + Timeout (2B) = 30 bytes minimum
+        if len(payload) < 32:
+            details["operation_type"] = "UNDECODED"
+            details["is_write"] = None
+            details["function_name"] = f"{cmd_name} (Truncated Header)"
+            return details
+
+        try:
+            # Common Packet Format (CPF) starts at byte 30
+            item_count = struct.unpack("<H", payload[30:32])[0]
+            idx = 32
+            data_item_payload = None
+
+            for _ in range(item_count):
+                if idx + 4 > len(payload):
+                    break
+                item_type, item_len = struct.unpack("<HH", payload[idx:idx + 4])
+                idx += 4
+                # 0x00B2: Unconnected Data Item; 0x00B1: Connected Data Item
+                if item_type in (0x00B2, 0x00B1):
+                    data_item_payload = payload[idx:idx + item_len]
+                    break
+                idx += item_len
+
+            if data_item_payload and len(data_item_payload) > 0:
+                details["cip_decoded"] = True
+                service_raw = data_item_payload[0]
+                is_response = bool(service_raw & 0x80)
+                service_code = service_raw & 0x7F
+
+                _CIP_SERVICES = {
+                    0x01: ("Get Attributes All", "READ", False),
+                    0x02: ("Set Attributes All", "WRITE", True),
+                    0x03: ("Get Attribute List", "READ", False),
+                    0x04: ("Set Attribute List", "WRITE", True),
+                    0x0E: ("Get Attribute Single", "READ", False),
+                    0x10: ("Set Attribute Single", "WRITE", True),
+                    0x4C: ("CIP Read Tag Service", "READ", False),
+                    0x4D: ("CIP Write Tag Service", "WRITE", True),
+                    0x4E: ("CIP Write Tag Fragmented / Read-Modify-Write", "WRITE", True),
+                    0x52: ("CIP Unconnected Send", "ROUTING", None),
+                    0x54: ("CIP Forward Open", "SESSION_MGMT", False),
+                }
+
+                suffix = " Response" if is_response else " Request"
+                details["cip_service_code"] = service_code
+                details["is_response"] = is_response
+
+                if service_code in _CIP_SERVICES:
+                    sname, op_type, is_wr = _CIP_SERVICES[service_code]
+                    details["function_name"] = sname + suffix
+                    details["operation_type"] = op_type
+                    details["is_write"] = is_wr
+                else:
+                    # Unsupported CIP service code - explicitly NOT read-only
+                    details["function_name"] = f"CIP Service 0x{service_code:02X}" + suffix
+                    details["operation_type"] = "UNSUPPORTED"
+                    details["is_write"] = None
+            else:
+                details["operation_type"] = "UNDECODED"
+                details["is_write"] = None
+                details["function_name"] = f"{cmd_name} (Missing CIP Data Item)"
+        except Exception:
+            details["operation_type"] = "UNDECODED"
+            details["is_write"] = None
+            details["function_name"] = f"{cmd_name} (Malformed CPF)"
+
+        return details
+
+    return details
 
 
 def _parse_dnp3(payload: bytes) -> dict | None:
@@ -311,7 +544,11 @@ def detect_protocol_from_payload(
     return Protocol.UNKNOWN, {}
 
 
-def is_write_command(protocol: Protocol, details: dict) -> bool:
-    """Return True if this observation represents a write/command to a device."""
-    return bool(details.get("is_write", False))
+def is_write_command(protocol: Protocol, details: dict) -> bool | None:
+    """
+    Return True if this observation represents a confirmed write/command to a device.
+    Return False if confirmed read or read-only session management.
+    Return None if unverified, unsupported, or undecoded.
+    """
+    return details.get("is_write", None)
 

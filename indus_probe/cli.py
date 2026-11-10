@@ -41,6 +41,7 @@ def _run_analysis(
     site: str,
     duration_str: str,
     output_dir: Path,
+    mode: str = "ASSESSMENT",
 ) -> None:
     from indus_probe.iec62443 import IEC62443Engine
     from indus_probe.report import generate_markdown_report, save_report
@@ -76,7 +77,7 @@ def _run_analysis(
         print(f"   🟠 HIGH:     {high}")
 
     # Generate report
-    print("\n📄 Generating report...")
+    print(f"\n📄 Generating report in {mode} mode...")
     report_md = generate_markdown_report(
         client_name=client_name,
         site_location=site,
@@ -88,6 +89,7 @@ def _run_analysis(
         protocol_stats=proto_stats,
         findings=findings,
         sl_scores=sl_scores,
+        mode=mode,
     )
 
     out = save_report(
@@ -135,6 +137,7 @@ def cmd_pcap(args: argparse.Namespace) -> None:
         site=args.site,
         duration_str="PCAP file analysis",
         output_dir=Path(args.output),
+        mode="ASSESSMENT",
     )
 
 
@@ -169,6 +172,7 @@ def cmd_live(args: argparse.Namespace) -> None:
         site=args.site,
         duration_str=f"{hours}h {minutes}m passive capture",
         output_dir=Path(args.output),
+        mode="ASSESSMENT",
     )
 
 
@@ -272,6 +276,7 @@ def cmd_demo(args: argparse.Namespace) -> None:
         site="Pune, Maharashtra, India",
         duration_str="48 hours (synthetic demo data)",
         output_dir=Path(args.output),
+        mode="DEMO",
     )
 
 

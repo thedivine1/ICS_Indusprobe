@@ -35,18 +35,46 @@ class Asset:
     first_seen: str = ""
     last_seen: str = ""
     in_client_inventory: bool = True   # set False if not in client list
+    observed_vendor: str | None = None
+    observed_model: str | None = None
+    observed_firmware: str | None = None
+    identity_evidence: str = "OUI_INFERENCE"  # CIP_IDENTITY, MODBUS_DEVICE_ID, UMAS_DECODE, OUI_INFERENCE
+    confidence: str = "MEDIUM"                # HIGH, MEDIUM, LOW
+
+    def record_observed_identity(
+        self,
+        vendor: str,
+        model: str = "",
+        evidence: str = "PROTOCOL_INSPECTION",
+        firmware: str = "",
+    ) -> None:
+        if vendor and evidence in ("CIP_IDENTITY", "MODBUS_DEVICE_ID", "UMAS_DECODE"):
+            self.observed_vendor = vendor
+            if model:
+                self.observed_model = model
+            if firmware:
+                self.observed_firmware = firmware
+            self.identity_evidence = evidence
+            self.confidence = "HIGH"
 
     def to_dict(self) -> dict:
+        effective_vendor = self.observed_vendor or (self.vendor_info.vendor if self.vendor_info else "Unknown")
+        effective_model = self.observed_model or (self.vendor_info.device_hint if self.vendor_info else "")
         return {
             "ip": self.ip,
             "mac": self.mac,
-            "vendor": self.vendor_info.vendor,
-            "device_hint": self.vendor_info.device_hint,
-            "purdue_level": self.vendor_info.purdue_level,
+            "vendor": effective_vendor,
+            "observed_vendor": self.observed_vendor or "",
+            "observed_model": effective_model,
+            "observed_firmware": self.observed_firmware or "",
+            "identity_evidence": self.identity_evidence,
+            "confidence": self.confidence,
+            "device_hint": self.vendor_info.device_hint if self.vendor_info else "",
+            "purdue_level": self.vendor_info.purdue_level if self.vendor_info else self.purdue_level,
             "protocols_seen": list(self.protocols_seen),
-            "protocol_expected": self.vendor_info.protocol_expected,
+            "protocol_expected": self.vendor_info.protocol_expected if self.vendor_info else "",
             "packet_count": self.packet_count,
-            "is_ot_device": self.vendor_info.is_ot_device,
+            "is_ot_device": self.vendor_info.is_ot_device if self.vendor_info else False,
             "in_client_inventory": self.in_client_inventory,
         }
 
@@ -60,7 +88,23 @@ class Session:
     protocol: str
     packet_count: int = 1
     byte_count: int = 0
+    read_count: int = 0
+    write_count: int = 0
+    undecoded_count: int = 0
+    unsupported_count: int = 0
     is_write: bool = False
+
+    @property
+    def classification(self) -> str:
+        if self.write_count > 0:
+            return "WRITE_OR_CONTROL"
+        elif self.read_count > 0:
+            return "READ_ONLY"
+        elif self.unsupported_count > 0:
+            return "UNSUPPORTED_OPERATION"
+        elif self.undecoded_count > 0:
+            return "UNDECODED_PAYLOAD"
+        return "HEADER_ONLY"
 
     def to_dict(self) -> dict:
         return {
@@ -71,14 +115,19 @@ class Session:
             "protocol": self.protocol,
             "packet_count": self.packet_count,
             "byte_count": self.byte_count,
+            "read_count": self.read_count,
+            "write_count": self.write_count,
+            "undecoded_count": self.undecoded_count,
+            "unsupported_count": self.unsupported_count,
             "is_write": self.is_write,
+            "classification": self.classification,
         }
 
 
 class PcapAnalyzer:
     """
     Passive PCAP/live-capture analyzer.
-    Requires pyshark (tshark) for packet parsing.
+    Requires pyshark (tshark) or scapy for packet parsing.
     """
 
     def __init__(self, known_assets: list[str] | None = None):
@@ -87,6 +136,14 @@ class PcapAnalyzer:
         self.observations: list[dict] = []
         self.protocol_stats: dict[str, int] = defaultdict(int)
         self.known_assets = set(known_assets or [])
+        self._packet_count = 0
+
+    def _reset_state(self) -> None:
+        """Reset internal accumulator state to prevent duplicate data across parsing passes."""
+        self.assets.clear()
+        self.sessions.clear()
+        self.observations.clear()
+        self.protocol_stats.clear()
         self._packet_count = 0
 
     # -------------------------------------------------------------------
@@ -99,6 +156,7 @@ class PcapAnalyzer:
         if not path.exists():
             raise FileNotFoundError(f"PCAP not found: {path}")
 
+        self._reset_state()
         logger.info(f"Analyzing {path.name} ...")
         try:
             import pyshark
@@ -113,7 +171,8 @@ class PcapAnalyzer:
             cap.close()
             return self._build_summary()
         except Exception as e:
-            logger.warning(f"pyshark/tshark error ({e}) — falling back to scapy engine")
+            logger.warning(f"pyshark/tshark error ({e}) — resetting state and falling back to scapy engine")
+            self._reset_state()
             return self._analyze_pcap_scapy(path)
 
     def analyze_live(self, interface: str, duration_seconds: int = 60) -> dict:
@@ -126,6 +185,7 @@ class PcapAnalyzer:
         except ImportError:
             raise RuntimeError("pyshark required for live capture: pip install pyshark")
 
+        self._reset_state()
         logger.info(
             f"[PASSIVE] Starting {duration_seconds}s capture on {interface}. "
             f"NO packets will be transmitted."
@@ -163,13 +223,15 @@ class PcapAnalyzer:
             dst_port = int(getattr(transport, "dstport", 0))
             pkt_len  = int(getattr(pkt, "length", 0))
 
-            # Try to get application-layer raw payload
+            # Genuine application-layer payload extraction from transport layer
             payload = b""
-            try:
-                raw = pkt.get_raw_packet()
-                payload = raw[-min(256, len(raw)):]  # last 256 bytes
-            except Exception:
-                pass
+            payload_hex = getattr(transport, "payload", None) or getattr(transport, "segment_data", None)
+            if payload_hex:
+                try:
+                    cleaned_hex = str(payload_hex).replace(":", "").replace(" ", "").strip()
+                    payload = bytes.fromhex(cleaned_hex)
+                except (ValueError, TypeError):
+                    payload = b""
 
             # Protocol detection
             proto, details = detect_protocol_from_payload(payload, dst_port, src_port)
@@ -177,33 +239,17 @@ class PcapAnalyzer:
 
             # Update assets
             if src_ip and src_mac:
-                self._upsert_asset(src_ip, src_mac, proto.value)
+                self._upsert_asset(src_ip, src_mac, proto.value, details)
             if dst_ip and dst_mac:
-                self._upsert_asset(dst_ip, dst_mac, proto.value)
+                self._upsert_asset(dst_ip, dst_mac, proto.value, details)
 
             # Update sessions
             if src_ip and dst_ip and proto != Protocol.UNKNOWN:
-                session_key = (src_ip, dst_ip, proto.value, dst_port)
-                if session_key in self.sessions:
-                    self.sessions[session_key].packet_count += 1
-                    self.sessions[session_key].byte_count   += pkt_len
-                    if write_flag:
-                        self.sessions[session_key].is_write = True
-                else:
-                    self.sessions[session_key] = Session(
-                        src_ip=src_ip, dst_ip=dst_ip,
-                        src_port=src_port, dst_port=dst_port,
-                        protocol=proto.value,
-                        packet_count=1, byte_count=pkt_len,
-                        is_write=write_flag,
-                    )
-
-            # Protocol stats
-            if proto != Protocol.UNKNOWN:
+                self._update_session(src_ip, dst_ip, src_port, dst_port, proto, pkt_len, details)
                 self.protocol_stats[proto.value] += 1
 
             # Detailed observation (for write-command tracking)
-            if write_flag:
+            if write_flag is True:
                 self.observations.append({
                     "protocol": proto.value,
                     "src_ip": src_ip, "dst_ip": dst_ip,
@@ -218,7 +264,11 @@ class PcapAnalyzer:
     def _analyze_pcap_scapy(self, path: Path) -> dict:
         """Fallback using scapy if pyshark/tshark is unavailable."""
         try:
-            from scapy.all import rdpcap, IP, TCP, UDP, Ether
+            import logging
+            logging.getLogger("scapy.runtime").setLevel(logging.ERROR)
+            from scapy.layers.l2 import Ether
+            from scapy.layers.inet import IP, TCP, UDP
+            from scapy.utils import rdpcap
         except ImportError:
             raise RuntimeError(
                 "Neither pyshark nor scapy found.\n"
@@ -242,31 +292,21 @@ class PcapAnalyzer:
 
                 src_port = int(transport.sport)
                 dst_port = int(transport.dport)
-                payload  = bytes(transport.payload)
+                # Genuine transport payload: bytes of transport layer's payload
+                payload  = bytes(transport.payload) if transport.payload else b""
                 pkt_len  = len(pkt)
 
                 proto, details = detect_protocol_from_payload(payload, dst_port, src_port)
                 write_flag     = is_write_command(proto, details)
 
-                self._upsert_asset(src_ip, src_mac, proto.value)
-                self._upsert_asset(dst_ip, dst_mac, proto.value)
+                self._upsert_asset(src_ip, src_mac, proto.value, details)
+                self._upsert_asset(dst_ip, dst_mac, proto.value, details)
 
                 if proto != Protocol.UNKNOWN:
-                    skey = (src_ip, dst_ip, proto.value, dst_port)
-                    if skey in self.sessions:
-                        self.sessions[skey].packet_count += 1
-                        self.sessions[skey].byte_count   += pkt_len
-                    else:
-                        self.sessions[skey] = Session(
-                            src_ip=src_ip, dst_ip=dst_ip,
-                            src_port=src_port, dst_port=dst_port,
-                            protocol=proto.value,
-                            packet_count=1, byte_count=pkt_len,
-                            is_write=write_flag,
-                        )
+                    self._update_session(src_ip, dst_ip, src_port, dst_port, proto, pkt_len, details)
                     self.protocol_stats[proto.value] += 1
 
-                if write_flag:
+                if write_flag is True:
                     self.observations.append({
                         "protocol": proto.value,
                         "src_ip": src_ip, "dst_ip": dst_ip,
@@ -284,7 +324,47 @@ class PcapAnalyzer:
     # Helpers
     # -------------------------------------------------------------------
 
-    def _upsert_asset(self, ip: str, mac: str, proto: str) -> None:
+    def _update_session(
+        self,
+        src_ip: str,
+        dst_ip: str,
+        src_port: int,
+        dst_port: int,
+        proto: Protocol,
+        pkt_len: int,
+        details: dict,
+    ) -> None:
+        """Update or insert session with rigorous read/write/undecoded semantics."""
+        session_key = (src_ip, dst_ip, proto.value, dst_port)
+        write_flag = is_write_command(proto, details)
+        op_type = details.get("operation_type", "UNDECODED")
+
+        if session_key in self.sessions:
+            session = self.sessions[session_key]
+            session.packet_count += 1
+            session.byte_count += pkt_len
+        else:
+            session = Session(
+                src_ip=src_ip, dst_ip=dst_ip,
+                src_port=src_port, dst_port=dst_port,
+                protocol=proto.value,
+                packet_count=1, byte_count=pkt_len,
+                is_write=False,
+            )
+            self.sessions[session_key] = session
+
+        # Increment specific operation counters
+        if write_flag is True or op_type == "WRITE":
+            session.write_count += 1
+            session.is_write = True  # Persistent write flag once any write is seen
+        elif op_type in ("READ", "SESSION_MGMT"):
+            session.read_count += 1
+        elif op_type == "UNSUPPORTED":
+            session.unsupported_count += 1
+        else:
+            session.undecoded_count += 1
+
+    def _upsert_asset(self, ip: str, mac: str, proto: str, details: dict | None = None) -> None:
         if not ip or ip in ("0.0.0.0", "255.255.255.255", ""):
             return
         if ip not in self.assets:
@@ -298,6 +378,15 @@ class PcapAnalyzer:
         if proto and proto != Protocol.UNKNOWN.value:
             asset.protocols_seen.add(proto)
 
+        # Record protocol-derived identity evidence if present
+        if details and details.get("observed_vendor"):
+            asset.record_observed_identity(
+                vendor=details["observed_vendor"],
+                model=details.get("observed_model", ""),
+                evidence=details.get("vendor_evidence", "PROTOCOL_INSPECTION"),
+                firmware=details.get("observed_firmware", ""),
+            )
+
     def _build_summary(self) -> dict:
         return {
             "total_packets": self._packet_count,
@@ -306,4 +395,3 @@ class PcapAnalyzer:
             "protocol_stats": dict(self.protocol_stats),
             "observations": self.observations,
         }
-

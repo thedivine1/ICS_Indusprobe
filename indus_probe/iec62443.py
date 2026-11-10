@@ -258,9 +258,8 @@ class IEC62443Engine:
                     severity="CRITICAL",
                     finding="Unregistered endpoints communicating with simulated Level 1 controllers",
                     evidence=(
-                        f"Observed {len(cross_sessions)} communication session(s) where endpoints absent from the lab reference "
+                        f"Observed {len(cross_sessions)} communication session(s) where endpoints absent from the reference "
                         f"inventory ({', '.join(src_ips)}) directly target Level 1 process controllers ({', '.join(dst_ips)}). "
-                        f"Scenario context: The lab manifest designates these endpoints as dispatch and vendor-support systems. "
                         f"Not established by traffic alone: Actual device ownership, permitted conduits, intervening firewall controls, or operational necessity."
                     ),
                     recommendation=(
@@ -518,7 +517,7 @@ class IEC62443Engine:
                 finding=f"{len(unknown)} unregistered active endpoint(s) detected on control network",
                 evidence=(
                     f"The following IP addresses were observed generating active traffic but are absent from "
-                    f"the lab reference inventory: {', '.join(a['ip'] for a in unknown)}. "
+                    f"the reference inventory: {', '.join(a['ip'] for a in unknown)}. "
                     f"Identities are inferred from observed traffic behaviors."
                 ),
                 recommendation=(
