@@ -1,11 +1,17 @@
 """
-Generate End-to-End Pilot Assessment Reports for Schneider Electric and Rockwell Automation
+Generate End-to-End Pilot Demonstration Reports for Schneider Electric and Rockwell Automation
+
 Demonstrates:
 - Scoped passive capture analysis
 - Exact packet, session, and operation counting
 - Separation of physical identity evidence (CIP ListIdentity, Modbus Device ID) from OUI inference
 - Bounded UMAS & CIP decoding with unknown/unsupported handling
-- Strict ASSESSMENT mode boundaries without synthetic demonstration disclaimers
+- DEMO mode with synthetic/lab-generated data disclaimer
+
+IMPORTANT: These reports are generated from SYNTHETIC PCAP fixtures constructed
+in memory and are labelled DEMONSTRATION REPORT to prevent confusion with real
+operational assessments.  ASSESSMENT mode must only be used with actual capture
+data from real site deployments.
 """
 
 import os
@@ -50,7 +56,9 @@ def build_schneider_pcap(path: Path) -> None:
     vname = b"Schneider Electric"
     mname = b"BMX P34 2020"
     rev = b"v03.20"
-    hdr43 = struct.pack(">HHHBBBBBBBB", 101, 0, 10 + len(vname) + len(mname) + len(rev), 1, 43, 0x0E, 1, 1, 0, 0, 3)
+    # MBAP length = 8 fixed (UID+FC+MEI+RDevID+Conf+More+Next+NumObjs) + obj lengths
+    mbap_len = 8 + 2 + len(vname) + 2 + len(mname) + 2 + len(rev)
+    hdr43 = struct.pack(">HHHBBBBBBBB", 101, 0, mbap_len, 1, 43, 0x0E, 1, 1, 0, 0, 3)
     obj0 = struct.pack("BB", 0, len(vname)) + vname
     obj1 = struct.pack("BB", 1, len(mname)) + mname
     obj2 = struct.pack("BB", 2, len(rev)) + rev
@@ -196,13 +204,14 @@ def main():
             findings=findings_s,
             sl_scores=sl_scores_s,
             consultant_name="IndusProbe v1.1 Passive Engine",
-            report_version="v1.1-pilot-schneider",
-            mode="ASSESSMENT",
+            report_version="v1.1-pilot-demo-schneider",
+            mode="DEMO",
+            is_synthetic=True,
         )
 
-        out_s = sample_reports_dir / "schneider_pilot_assessment_example.md"
+        out_s = sample_reports_dir / "schneider_pilot_demo_example.md"
         out_s.write_text(report_schneider_md, encoding="utf-8")
-        print(f"✅ Schneider Pilot Report written to: {out_s}")
+        print(f"✅ Schneider Pilot Demo Report written to: {out_s}")
 
         # -------------------------------------------------------------------
         # Rockwell Automation Pilot Assessment Generation
@@ -235,14 +244,16 @@ def main():
             findings=findings_r,
             sl_scores=sl_scores_r,
             consultant_name="IndusProbe v1.1 Passive Engine",
-            report_version="v1.1-pilot-rockwell",
-            mode="ASSESSMENT",
+            report_version="v1.1-pilot-demo-rockwell",
+            mode="DEMO",
+            is_synthetic=True,
         )
 
-        out_r = sample_reports_dir / "rockwell_pilot_assessment_example.md"
+        out_r = sample_reports_dir / "rockwell_pilot_demo_example.md"
         out_r.write_text(report_rockwell_md, encoding="utf-8")
-        print(f"✅ Rockwell Pilot Report written to: {out_r}")
+        print(f"✅ Rockwell Pilot Demo Report written to: {out_r}")
 
 
 if __name__ == "__main__":
     main()
+

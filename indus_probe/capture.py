@@ -92,18 +92,29 @@ class Session:
     write_count: int = 0
     undecoded_count: int = 0
     unsupported_count: int = 0
+    session_mgmt_count: int = 0  # SESSION_MGMT frames — NOT counted as reads
     is_write: bool = False
 
     @property
     def classification(self) -> str:
         if self.write_count > 0:
             return "WRITE_OR_CONTROL"
+        elif self.read_count > 0 and (
+            self.undecoded_count > 0
+            or self.unsupported_count > 0
+            or self.session_mgmt_count > 0
+        ):
+            # Reads are present but so are frames whose operation is not fully known.
+            # Must NOT be labelled READ_ONLY — the full session intent is ambiguous.
+            return "MIXED_READ_UNKNOWN"
         elif self.read_count > 0:
             return "READ_ONLY"
         elif self.unsupported_count > 0:
             return "UNSUPPORTED_OPERATION"
         elif self.undecoded_count > 0:
             return "UNDECODED_PAYLOAD"
+        elif self.session_mgmt_count > 0:
+            return "SESSION_MGMT_ONLY"
         return "HEADER_ONLY"
 
     def to_dict(self) -> dict:
@@ -119,6 +130,7 @@ class Session:
             "write_count": self.write_count,
             "undecoded_count": self.undecoded_count,
             "unsupported_count": self.unsupported_count,
+            "session_mgmt_count": self.session_mgmt_count,
             "is_write": self.is_write,
             "classification": self.classification,
         }
@@ -237,11 +249,18 @@ class PcapAnalyzer:
             proto, details = detect_protocol_from_payload(payload, dst_port, src_port)
             write_flag = is_write_command(proto, details)
 
-            # Update assets
+            # Update assets — identity evidence is directional.
+            # Protocol responses carry identity of the *responder* (src IP).
+            # UMAS frames carry Schneider identity of the *addressed PLC* (dst IP).
+            # Details are passed without identity to both sides, then identity is
+            # applied selectively to the correct endpoint only.
             if src_ip and src_mac:
-                self._upsert_asset(src_ip, src_mac, proto.value, details)
+                self._upsert_asset(src_ip, src_mac, proto.value)
             if dst_ip and dst_mac:
-                self._upsert_asset(dst_ip, dst_mac, proto.value, details)
+                self._upsert_asset(dst_ip, dst_mac, proto.value)
+
+            # Apply identity evidence to the correct endpoint only
+            self._apply_identity(src_ip, dst_ip, details)
 
             # Update sessions
             if src_ip and dst_ip and proto != Protocol.UNKNOWN:
@@ -299,8 +318,12 @@ class PcapAnalyzer:
                 proto, details = detect_protocol_from_payload(payload, dst_port, src_port)
                 write_flag     = is_write_command(proto, details)
 
-                self._upsert_asset(src_ip, src_mac, proto.value, details)
-                self._upsert_asset(dst_ip, dst_mac, proto.value, details)
+                # Update assets without identity; apply identity directionally below
+                self._upsert_asset(src_ip, src_mac, proto.value)
+                self._upsert_asset(dst_ip, dst_mac, proto.value)
+
+                # Apply identity evidence to the correct endpoint only
+                self._apply_identity(src_ip, dst_ip, details)
 
                 if proto != Protocol.UNKNOWN:
                     self._update_session(src_ip, dst_ip, src_port, dst_port, proto, pkt_len, details)
@@ -324,6 +347,45 @@ class PcapAnalyzer:
     # Helpers
     # -------------------------------------------------------------------
 
+    def _apply_identity(self, src_ip: str, dst_ip: str, details: dict) -> None:
+        """
+        Apply decoded identity evidence to the correct endpoint only.
+
+        Identity ownership rules:
+        - Modbus FC43 response (payload[8]==0x0E present, observed_vendor set, evidence==MODBUS_DEVICE_ID):
+            The identity describes the *responding* device → src_ip (the responder on port 502).
+        - CIP ListIdentity response (vendor_evidence==CIP_IDENTITY):
+            The identity describes the *responding* device → src_ip (the device being listed).
+        - UMAS FC90 (vendor_evidence==UMAS_DECODE):
+            Schneider Electric identity belongs to the *addressed PLC* → dst_ip (the target on port 502).
+            Requests originate from engineering workstation; dst_ip is the PLC.
+        - All other cases: no identity update.
+        """
+        if not details or not details.get("observed_vendor"):
+            return
+
+        evidence = details.get("vendor_evidence", "")
+
+        if evidence == "UMAS_DECODE":
+            # UMAS identity belongs to the addressed PLC (dst_ip)
+            if dst_ip and dst_ip in self.assets:
+                self.assets[dst_ip].record_observed_identity(
+                    vendor=details["observed_vendor"],
+                    model=details.get("observed_model", ""),
+                    evidence=evidence,
+                    firmware=details.get("observed_firmware", ""),
+                )
+        elif evidence in ("MODBUS_DEVICE_ID", "CIP_IDENTITY"):
+            # Response identity belongs to the responder (src_ip)
+            if src_ip and src_ip in self.assets:
+                self.assets[src_ip].record_observed_identity(
+                    vendor=details["observed_vendor"],
+                    model=details.get("observed_model", ""),
+                    evidence=evidence,
+                    firmware=details.get("observed_firmware", ""),
+                )
+        # Other evidence types (NONE, PROTOCOL_INSPECTION) are not applied here
+
     def _update_session(
         self,
         src_ip: str,
@@ -334,8 +396,13 @@ class PcapAnalyzer:
         pkt_len: int,
         details: dict,
     ) -> None:
-        """Update or insert session with rigorous read/write/undecoded semantics."""
-        session_key = (src_ip, dst_ip, proto.value, dst_port)
+        """Update or insert session with rigorous read/write/undecoded/session-mgmt semantics.
+
+        Session key includes src_port to prevent collision between two simultaneous
+        client connections from different ephemeral ports to the same destination.
+        """
+        # Include src_port in the key to avoid collisions from different ephemeral source ports
+        session_key = (src_ip, src_port, dst_ip, dst_port, proto.value)
         write_flag = is_write_command(proto, details)
         op_type = details.get("operation_type", "UNDECODED")
 
@@ -353,18 +420,21 @@ class PcapAnalyzer:
             )
             self.sessions[session_key] = session
 
-        # Increment specific operation counters
-        if write_flag is True or op_type == "WRITE":
+        # Increment specific operation counters — SESSION_MGMT is NOT a read
+        if op_type == "SESSION_MGMT":
+            session.session_mgmt_count += 1
+        elif write_flag is True or op_type == "WRITE":
             session.write_count += 1
             session.is_write = True  # Persistent write flag once any write is seen
-        elif op_type in ("READ", "SESSION_MGMT"):
+        elif op_type == "READ":
             session.read_count += 1
         elif op_type == "UNSUPPORTED":
             session.unsupported_count += 1
         else:
             session.undecoded_count += 1
 
-    def _upsert_asset(self, ip: str, mac: str, proto: str, details: dict | None = None) -> None:
+    def _upsert_asset(self, ip: str, mac: str, proto: str) -> None:
+        """Insert or update an asset record. Identity is applied separately via _apply_identity()."""
         if not ip or ip in ("0.0.0.0", "255.255.255.255", ""):
             return
         if ip not in self.assets:
@@ -377,15 +447,6 @@ class PcapAnalyzer:
         asset.packet_count += 1
         if proto and proto != Protocol.UNKNOWN.value:
             asset.protocols_seen.add(proto)
-
-        # Record protocol-derived identity evidence if present
-        if details and details.get("observed_vendor"):
-            asset.record_observed_identity(
-                vendor=details["observed_vendor"],
-                model=details.get("observed_model", ""),
-                evidence=details.get("vendor_evidence", "PROTOCOL_INSPECTION"),
-                firmware=details.get("observed_firmware", ""),
-            )
 
     def _build_summary(self) -> dict:
         return {

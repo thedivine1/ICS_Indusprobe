@@ -13,6 +13,12 @@ Supports:
   - Modbus RTU over TCP
 
 All detection is PASSIVE — this module only reads packets, never injects.
+
+NOTE: This module inspects individual TCP/UDP frames as received at the tap.
+TCP stream reassembly is NOT performed here.  If tshark is used as the backend,
+pyshark may expose reassembled TCP segments via the .payload attribute for some
+captures, but this is capture-configuration-dependent and NOT guaranteed.
+Treat frame-level parsing results as a lower bound on actual PDU coverage.
 """
 
 from __future__ import annotations
@@ -91,12 +97,43 @@ def _parse_modbus(payload: bytes) -> dict | None:
     Modbus Application Protocol (MBAP) header:
       Transaction ID (2) + Protocol ID (2, must be 0x0000)
       + Length (2) + Unit ID (1) + Function Code (1) + data
+
+    After parsing the MBAP Length field, the declared byte count is validated
+    against the actual payload size to detect truncated or multi-PDU frames.
     """
     if len(payload) < 8:
         return None
     tid, proto_id, length, unit_id, fc = struct.unpack(">HHHBB", payload[:8])
     if proto_id != 0x0000:
         return None
+
+    # MBAP length counts bytes from Unit ID onward; full frame expected = 6 + length bytes
+    expected_total = 6 + length
+    if len(payload) < expected_total:
+        # Truncated frame — declared length exceeds available bytes
+        return {
+            "transaction_id": tid,
+            "unit_id": unit_id,
+            "function_code": None,
+            "function_name": "Modbus Truncated Frame",
+            "operation_type": "UNDECODED",
+            "is_write": None,
+            "length": length,
+            "truncation_note": (
+                f"Declared length {length} B, payload only {len(payload) - 6} B available. "
+                "Frame may be truncated at the tap. Operation cannot be determined."
+            ),
+        }
+
+    # If payload is longer than declared, only the first PDU is parsed;
+    # remainder is not processed — note is recorded but does not affect classification.
+    multi_pdu_note = None
+    if len(payload) > expected_total:
+        multi_pdu_note = (
+            f"Payload ({len(payload)} B) exceeds declared MBAP length ({expected_total} B). "
+            "Possible multi-PDU TCP segment; only first PDU is parsed."
+        )
+        payload = payload[:expected_total]
 
     _STD_FCS = {
         1:  ("Read Coils", "READ", False),
@@ -124,6 +161,8 @@ def _parse_modbus(payload: bytes) -> dict | None:
             "length": length,
             "vendor_evidence": "MODBUS_DEVICE_ID",
         }
+        if multi_pdu_note:
+            details["multi_pdu_note"] = multi_pdu_note
         # Parse MEI response objects if available
         # Header: MEI Type (1B, 0x0E), Read Device ID (1B), Conformity (1B), More (1B), Next (1B), Num Objects (1B)
         if len(payload) > 14 and payload[8] == 0x0E:
@@ -153,19 +192,29 @@ def _parse_modbus(payload: bytes) -> dict | None:
     # FC 90 (0x5A): Schneider UMAS (Modicon Unity/M340/M580 proprietary service)
     if fc == 90:
         umas_code = payload[8] if len(payload) > 8 else None
+        # Operation classifications for UMAS subcodes.
+        # Only subcodes with unambiguous semantics from the UMAS protocol structure are
+        # classified as READ/WRITE/SESSION_MGMT.  Subcodes whose byte-offset mappings and
+        # field semantics have NOT been independently verified from public documentation are
+        # classified as UNKNOWN (is_write=None) pending further evidence.  Vendor recognition
+        # (Schneider Electric) is preserved for all matched UMAS frames regardless of
+        # operation classification.
         _UMAS_FUNCTIONS = {
+            # Confirmed unambiguous from UMAS protocol structure:
             0x01: ("UMAS Init Communication / Assign Session", "SESSION_MGMT", False),
-            0x02: ("UMAS Read Memory Block / Read PLC Info", "READ", False),
-            0x03: ("UMAS Read Internal Bits / Registers", "READ", False),
-            0x04: ("UMAS Write Internal Bits / Registers", "WRITE", True),
-            0x06: ("UMAS Read System Bits", "READ", False),
-            0x07: ("UMAS Write System Bits", "WRITE", True),
-            0x20: ("UMAS Read Memory Card / Backup", "READ", False),
-            0x22: ("UMAS Read Project Info", "READ", False),
-            0x24: ("UMAS Read Variable Info", "READ", False),
-            0x30: ("UMAS Read Executive / Hardware ID", "READ", False),
-            0x50: ("UMAS Stop PLC", "WRITE", True),
-            0x58: ("UMAS Start PLC", "WRITE", True),
+            0x04: ("UMAS Write Internal Bits / Registers",     "WRITE",        True),
+            0x07: ("UMAS Write System Bits",                   "WRITE",        True),
+            0x50: ("UMAS Stop PLC",                            "WRITE",        True),
+            0x58: ("UMAS Start PLC",                           "WRITE",        True),
+            # Recognized subcodes — operation classification unverified pending
+            # independent documentation of byte offsets and field semantics:
+            0x02: ("UMAS FC 0x02 (operation unverified — classified UNKNOWN)", "UNKNOWN", None),
+            0x03: ("UMAS FC 0x03 (operation unverified — classified UNKNOWN)", "UNKNOWN", None),
+            0x06: ("UMAS FC 0x06 (operation unverified — classified UNKNOWN)", "UNKNOWN", None),
+            0x20: ("UMAS FC 0x20 (operation unverified — classified UNKNOWN)", "UNKNOWN", None),
+            0x22: ("UMAS FC 0x22 (operation unverified — classified UNKNOWN)", "UNKNOWN", None),
+            0x24: ("UMAS FC 0x24 (operation unverified — classified UNKNOWN)", "UNKNOWN", None),
+            0x30: ("UMAS FC 0x30 (operation unverified — classified UNKNOWN)", "UNKNOWN", None),
         }
 
         if umas_code in _UMAS_FUNCTIONS:
@@ -363,54 +412,98 @@ def _parse_enip(payload: bytes) -> dict | None:
             details["function_name"] = f"{cmd_name} (Truncated Header)"
             return details
 
+        # Framing distinction:
+        #   0x006F SendRRData  → Unconnected messaging → Data Item type 0x00B2
+        #                        (Unconnected Data Item); CIP data starts at byte 0 of item data.
+        #   0x0070 SendUnitData → Connected messaging  → Data Item type 0x00B1
+        #                        (Connected Data Item); first 2 bytes are Connection Sequence
+        #                        Number and must be skipped before CIP service code.
+        is_connected_messaging = (cmd == 0x0070)
+
         try:
             # Common Packet Format (CPF) starts at byte 30
             item_count = struct.unpack("<H", payload[30:32])[0]
             idx = 32
-            data_item_payload = None
+            cip_data = None
+            found_item_type = None
 
             for _ in range(item_count):
                 if idx + 4 > len(payload):
                     break
                 item_type, item_len = struct.unpack("<HH", payload[idx:idx + 4])
                 idx += 4
-                # 0x00B2: Unconnected Data Item; 0x00B1: Connected Data Item
-                if item_type in (0x00B2, 0x00B1):
-                    data_item_payload = payload[idx:idx + item_len]
+
+                # Validate item_len is within remaining payload before reading
+                if idx + item_len > len(payload):
+                    details["operation_type"] = "UNDECODED"
+                    details["is_write"] = None
+                    details["function_name"] = f"{cmd_name} (Truncated CPF Item)"
+                    return details
+
+                if item_type == 0x00B2:
+                    # Unconnected Data Item — CIP data starts immediately
+                    cip_data = payload[idx:idx + item_len]
+                    found_item_type = 0x00B2
+                    break
+                elif item_type == 0x00B1:
+                    # Connected Data Item — skip 2-byte Connection Sequence Number
+                    if item_len >= 2:
+                        cip_data = payload[idx + 2:idx + item_len]
+                    else:
+                        cip_data = b""
+                    found_item_type = 0x00B1
                     break
                 idx += item_len
 
-            if data_item_payload and len(data_item_payload) > 0:
+            if cip_data and len(cip_data) > 0:
                 details["cip_decoded"] = True
-                service_raw = data_item_payload[0]
+                details["is_connected"] = (found_item_type == 0x00B1)
+                service_raw = cip_data[0]
                 is_response = bool(service_raw & 0x80)
                 service_code = service_raw & 0x7F
 
                 _CIP_SERVICES = {
-                    0x01: ("Get Attributes All", "READ", False),
-                    0x02: ("Set Attributes All", "WRITE", True),
-                    0x03: ("Get Attribute List", "READ", False),
-                    0x04: ("Set Attribute List", "WRITE", True),
-                    0x0E: ("Get Attribute Single", "READ", False),
-                    0x10: ("Set Attribute Single", "WRITE", True),
-                    0x4C: ("CIP Read Tag Service", "READ", False),
-                    0x4D: ("CIP Write Tag Service", "WRITE", True),
-                    0x4E: ("CIP Write Tag Fragmented / Read-Modify-Write", "WRITE", True),
-                    0x52: ("CIP Unconnected Send", "ROUTING", None),
-                    0x54: ("CIP Forward Open", "SESSION_MGMT", False),
+                    0x01: ("Get Attributes All",                       "READ",         False),
+                    0x02: ("Set Attributes All",                       "WRITE",        True),
+                    0x03: ("Get Attribute List",                       "READ",         False),
+                    0x04: ("Set Attribute List",                       "WRITE",        True),
+                    0x0E: ("Get Attribute Single",                     "READ",         False),
+                    0x10: ("Set Attribute Single",                     "WRITE",        True),
+                    0x4C: ("CIP Read Tag Service",                     "READ",         False),
+                    0x4D: ("CIP Write Tag Service",                    "WRITE",        True),
+                    0x4E: ("CIP Write Tag Fragmented / Read-Modify-Write", "WRITE",   True),
+                    0x52: ("CIP Unconnected Send",                     "ROUTING",      None),
+                    0x54: ("CIP Forward Open",                         "SESSION_MGMT", False),
                 }
 
                 suffix = " Response" if is_response else " Request"
                 details["cip_service_code"] = service_code
+                details["is_request"] = not is_response
                 details["is_response"] = is_response
 
+                if is_response:
+                    # CIP response layout: service (1B) | reserved (1B) | general_status (1B) | ...
+                    general_status = cip_data[2] if len(cip_data) >= 3 else None
+                    details["cip_general_status"] = general_status
+
                 if service_code in _CIP_SERVICES:
-                    sname, op_type, is_wr = _CIP_SERVICES[service_code]
+                    sname, op_type, is_wr_expected = _CIP_SERVICES[service_code]
                     details["function_name"] = sname + suffix
                     details["operation_type"] = op_type
-                    details["is_write"] = is_wr
+
+                    if is_response and is_wr_expected:
+                        # Write confirmed only when response status is 0x00 (Success)
+                        general_status = details.get("cip_general_status")
+                        details["is_write"] = (general_status == 0x00) if general_status is not None else None
+                    elif not is_response and is_wr_expected:
+                        # Write request observed; outcome unknown without matching response
+                        # is_write=None indicates "write-class operation, outcome unconfirmed"
+                        details["is_write"] = None
+                    else:
+                        # Read, session-management, routing — not a write
+                        details["is_write"] = is_wr_expected
                 else:
-                    # Unsupported CIP service code - explicitly NOT read-only
+                    # Unsupported CIP service code — explicitly NOT read-only
                     details["function_name"] = f"CIP Service 0x{service_code:02X}" + suffix
                     details["operation_type"] = "UNSUPPORTED"
                     details["is_write"] = None

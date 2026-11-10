@@ -46,7 +46,26 @@ def generate_markdown_report(
     consultant_name: str = "IndusProbe Assessment Engine",
     report_version: str = "v1.1-assessment",
     mode: str = "ASSESSMENT",
+    is_synthetic: bool = False,
 ) -> str:
+    """Generate a Markdown report.
+
+    Args:
+        mode: "ASSESSMENT" for real capture data; "DEMO" for synthetic/lab data.
+              Invalid values raise ValueError.
+        is_synthetic: Set True when the input data is synthetically generated.
+                      ASSESSMENT mode rejects synthetic inputs — use DEMO instead.
+    """
+    mode = mode.upper()
+    if mode not in ("ASSESSMENT", "DEMO"):
+        raise ValueError(
+            f"Invalid report mode {mode!r}. Must be 'ASSESSMENT' or 'DEMO'."
+        )
+    if mode == "ASSESSMENT" and is_synthetic:
+        raise ValueError(
+            "ASSESSMENT mode cannot be used with synthetic inputs. "
+            "Use mode='DEMO' for synthetic or lab-generated data."
+        )
 
     findings_sorted = sorted(findings, key=lambda f: _SEVERITY_ORDER.get(f.severity, 99))
     ot_assets = [a for a in assets if a.get("is_ot_device")]
@@ -504,8 +523,8 @@ def generate_markdown_report(
         ]
     else:
         lines += [
-            f"| # | Source Endpoint | Destination Endpoint | Protocol & Port | Total Packets | Read PDUs | Write PDUs | Undecoded / Unsupported | Session Classification |",
-            f"|---|-----------------|----------------------|-----------------|---------------|-----------|------------|-------------------------|------------------------|",
+            f"| # | Source Endpoint | Destination Endpoint | Protocol & Port | Total Frames | Read Frames | Write Frames | Mgmt / Unknown Frames | Session Classification |",
+            f"|---|-----------------|----------------------|-----------------|--------------|-------------|--------------|------------------------|------------------------|",
         ]
         for i, sess in enumerate(sessions, 1):
             src = f"`{sess['src_ip']}:{sess['src_port']}`"
@@ -514,15 +533,19 @@ def generate_markdown_report(
             pkts = f"{sess['packet_count']:,}"
             reads = f"{sess.get('read_count', 0):,}"
             writes = f"{sess.get('write_count', 0):,}"
-            undec = f"{(sess.get('undecoded_count', 0) + sess.get('unsupported_count', 0)):,}"
+            mgmt_unknown = f"{(sess.get('session_mgmt_count', 0) + sess.get('undecoded_count', 0) + sess.get('unsupported_count', 0)):,}"
             cls_name = sess.get('classification', 'WRITE_OR_CONTROL' if sess.get('is_write') else 'READ_ONLY')
 
             lines.append(
-                f"| {i} | {src} | {dst} | {proto} | {pkts} | {reads} | {writes} | {undec} | `{cls_name}` |"
+                f"| {i} | {src} | {dst} | {proto} | {pkts} | {reads} | {writes} | {mgmt_unknown} | `{cls_name}` |"
             )
         lines += [
             f"",
             f"*Total Reconciled Frames in Appendix: {sum(s['packet_count'] for s in sessions):,}*",
+            f"",
+            f"> **Note**: All frame counts are TCP/UDP frames as observed at the passive tap — not application PDUs.",
+            f"> A single TCP segment may carry multiple application PDUs if segments were coalesced before the tap point.",
+            f"> Session-management frames (RegisterSession, ForwardOpen, UMAS Init) are counted separately and excluded from Read/Write totals.",
             f"",
             f"---",
             f"",
