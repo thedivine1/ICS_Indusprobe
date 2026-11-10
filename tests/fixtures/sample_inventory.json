@@ -1,0 +1,63 @@
+[
+  {
+    "ip": "10.1.1.10",
+    "mac": "00:80:f4:1a:2b:3c",
+    "vendor": "Schneider Electric",
+    "model_raw": "Modicon M580 BMEP584040",
+    "firmware_version_raw": "SV3.10",
+    "software_name": null,
+    "software_version_raw": null,
+    "device_hint": "Schneider Electric Modicon M580 ePAC",
+    "identification_basis": "LAB_MANIFEST",
+    "provenance_note": "Lab reference manifest page 2"
+  },
+  {
+    "ip": "10.1.1.11",
+    "mac": "00:80:f4:2c:3d:4e",
+    "vendor": "Schneider Electric",
+    "model_raw": "Modicon M340 BMXP342020",
+    "firmware_version_raw": null,
+    "software_name": null,
+    "software_version_raw": null,
+    "device_hint": "Schneider Electric Modicon M340",
+    "identification_basis": "OUI_INFERENCE",
+    "provenance_note": "OUI lookup only — model inferred from Modbus Device ID response"
+  },
+  {
+    "ip": "10.1.1.50",
+    "mac": "00:1a:4b:12:34:56",
+    "vendor": "Schneider Electric",
+    "model_raw": "Engineering Workstation",
+    "firmware_version_raw": null,
+    "software_name": "EcoStruxure Control Expert",
+    "software_version_raw": "14.1",
+    "device_hint": "EcoStruxure Control Expert workstation",
+    "identification_basis": "CLIENT_REGISTER",
+    "provenance_note": "Customer-supplied asset register, row 12"
+  },
+  {
+    "ip": "10.1.1.100",
+    "mac": "00:60:35:aa:bb:cc",
+    "vendor": "Rockwell Automation",
+    "model_raw": "ControlLogix 5580 1756-L83E",
+    "firmware_version_raw": "v32.013",
+    "software_name": null,
+    "software_version_raw": null,
+    "device_hint": "Rockwell ControlLogix 5580",
+    "identification_basis": "LAB_MANIFEST",
+    "provenance_note": "Lab manifest — CIP identity object response"
+  },
+  {
+    "ip": "10.1.1.200",
+    "mac": "00:50:f9:dd:ee:ff",
+    "vendor": "Yokogawa",
+    "model_raw": "CENTUM VP Field Control Station",
+    "firmware_version_raw": "R6.03",
+    "software_name": null,
+    "software_version_raw": null,
+    "device_hint": "Yokogawa CENTUM VP Gateway",
+    "identification_basis": "LAB_MANIFEST",
+    "provenance_note": "Lab reference manifest page 3"
+  }
+]
+

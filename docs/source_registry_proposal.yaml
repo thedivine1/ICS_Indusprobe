@@ -1,0 +1,165 @@
+# =============================================================================
+# IndusProbe Advisory Intelligence — Source Registry Specification
+# Version: 1.1.0-REVISED
+# Purpose: Authoritative, verified directory of OT vulnerability feeds
+# =============================================================================
+
+registry_metadata:
+  version: "1.1.0"
+  last_audited_utc: "2026-11-10T12:15:00Z"
+  maintainer: "IndusProbe Defensive OT Engineering Team"
+  contact: "contact@indusprobe.internal"
+  throttling_policy: "All rate limits noted as (proposed internal throttle) represent client-side defensive throttles to prevent accidental load or IP bans. They are not official published vendor rate limits."
+
+sources:
+  # ---------------------------------------------------------------------------
+  # Priority 1: Schneider Electric (MVP Phase 1)
+  # ---------------------------------------------------------------------------
+  - id: "src_schneider_csaf"
+    publisher: "Schneider Electric SE"
+    vendor_key: "schneider_electric"
+    priority: "P1"
+    connector_status: "ENDPOINT_VERIFIED"
+    verification_evidence:
+      discovery_url: "https://www.se.com/ww/en/work/support/cybersecurity/security-notifications/"
+      metadata_url: "https://www.se.com/.well-known/csaf/provider-metadata.json"
+      sample_advisory_url: "https://www.se.com/.well-known/csaf/2020/sevd-2020-343-08.json"
+      retrieval_timestamp_utc: "2026-11-10T11:44:29Z"
+      http_status: 200
+      content_type: "application/json"
+      file_size_bytes: 30178
+      sha256: "8590e455379db76c0239664ac53671fdf54847750c500ab3fed8fb883782dd65"
+      schema_detected: "CSAF 2.0"
+      access_restrictions_encountered: "Direct download permitted via standard HTTPS GET. Akamai edge caching headers present. Client-side throttle recommended."
+    format: "CSAF_2_0"
+    access_method: "HTTPS_GET"
+    client_throttling:
+      proposed_internal_throttle_rps: 2.0
+      burst_limit: 4
+      timeout_seconds: 15
+    restrictions:
+      terms_of_use: "Schneider Electric Cybersecurity Notification Terms."
+      redistribution_policy: "Defensive assessment and internal audit permitted."
+    update_mechanism:
+      type: "CSAF_INDEX_TXT"
+      index_url: "https://www.se.com/.well-known/csaf/index.txt"
+      supports_conditional_get: true
+    staging_notes: "Endpoint verified and sample downloaded. Contains authoritative M580 and M340 vulnerability records including SEVD-2020-343-08 and SEVD-2021-194-01."
+
+  # ---------------------------------------------------------------------------
+  # Priority 1: Rockwell Automation (MVP Phase 1 — via Verified CISA Mirror)
+  # ---------------------------------------------------------------------------
+  - id: "src_rockwell_automation"
+    publisher: "Rockwell Automation, Inc."
+    vendor_key: "rockwell_automation"
+    priority: "P1"
+    connector_status: "ENDPOINT_VERIFIED"
+    verification_evidence:
+      discovery_url: "https://www.rockwellautomation.com/en-us/trust-center/security-advisories.html"
+      metadata_url: "https://www.rockwellautomation.com/.well-known/csaf/provider-metadata.json"
+      direct_access_status: "BLOCKED (HTTP 403 Forbidden by AkamaiGHost bot-protection on direct vendor domain)"
+      mirror_discovery_url: "https://github.com/cisagov/CSAF"
+      sample_advisory_url: "https://raw.githubusercontent.com/cisagov/CSAF/develop/csaf_files/OT/white/2022/icsa-22-090-05.json"
+      retrieval_timestamp_utc: "2026-11-10T12:13:33Z"
+      http_status: 200
+      content_type: "text/plain; charset=utf-8"
+      file_size_bytes: 35948
+      sha256: "da22c37a7bc81d8edd1c3193caafb4cfe0fd3425070bbbc33ce7251c27e5d4ea"
+      schema_detected: "CSAF 2.0"
+      access_restrictions_encountered: "Direct vendor metadata endpoint returns HTTP 403 (Akamai WAF). CISA official CSAF git repository provides authoritative white-label CSAF 2.0 advisories for Rockwell Logix controllers without access blocks."
+    format: "CSAF_2_0"
+    access_method: "HTTPS_GET_MIRROR"
+    client_throttling:
+      proposed_internal_throttle_rps: 1.0
+      timeout_seconds: 15
+    restrictions:
+      terms_of_use: "CISA / Rockwell Coordinated Vulnerability Disclosure."
+      redistribution_policy: "Publicly accessible CSAF records."
+    update_mechanism:
+      type: "GIT_RELEASE_SYNC"
+      supports_conditional_get: true
+    staging_notes: "Direct vendor endpoint is BLOCKED by Akamai WAF. Ingestion utilizes the official CISA CSAF mirror (ICSA-22-090-05 / CVE-2022-1161 verified)."
+
+  # ---------------------------------------------------------------------------
+  # Priority 3: Official CVEProject/cvelistV5 (Associated CVE Records)
+  # ---------------------------------------------------------------------------
+  - id: "src_cve_project_v5"
+    publisher: "CVE Project (CNA Community / CISA / MITRE)"
+    vendor_key: "cve_project"
+    priority: "P3"
+    connector_status: "ENDPOINT_VERIFIED"
+    verification_evidence:
+      discovery_url: "https://github.com/CVEProject/cvelistV5"
+      metadata_url: "https://raw.githubusercontent.com/CVEProject/cve-schema/master/schema/v5.0/CVE_JSON_5.0_schema.json"
+      sample_advisory_url: "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2020/7xxx/CVE-2020-7537.json"
+      retrieval_timestamp_utc: "2026-11-10T10:17:25Z"
+      http_status: 200
+      content_type: "text/plain; charset=utf-8"
+      file_size_bytes: 6286
+      sha256: "8de4724a69935e32a0c2e45e2490fed72fae5a6b69d2effad1d296d2d1373386"
+      schema_detected: "CVE_RECORD 5.1"
+      access_restrictions_encountered: "None on raw.githubusercontent.com. Bounded sample downloads must observe GitHub rate limits."
+    format: "CVE_JSON_5_1"
+    access_method: "HTTPS_GET"
+    client_throttling:
+      proposed_internal_throttle_rps: 2.0
+      timeout_seconds: 10
+    restrictions:
+      terms_of_use: "CVE Program Terms of Use (Open Data CC0)."
+      redistribution_policy: "Unrestricted open data."
+    update_mechanism:
+      type: "TARGETED_CVE_FETCH"
+      supports_conditional_get: true
+    staging_notes: "Verified against CVE-2020-7537, CVE-2021-22779, and CVE-2018-10620. Ingestion limited strictly to targeted benchmark CVEs in Phase 1."
+
+  # ---------------------------------------------------------------------------
+  # Priority 3: CISA Known Exploited Vulnerabilities (KEV) Catalog
+  # ---------------------------------------------------------------------------
+  - id: "src_cisa_kev"
+    publisher: "Cybersecurity and Infrastructure Security Agency (CISA)"
+    vendor_key: "cisa"
+    priority: "P3"
+    connector_status: "ENDPOINT_VERIFIED"
+    verification_evidence:
+      discovery_url: "https://www.cisa.gov/known-exploited-vulnerabilities-catalog"
+      metadata_url: "https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json"
+      sample_advisory_url: "https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json"
+      retrieval_timestamp_utc: "2026-11-10T11:38:52Z"
+      http_status: 200
+      content_type: "application/json"
+      file_size_bytes: 1840000 # ~1.8 MB
+      sha256: "Snapshot verified via ETag 1c12cd-65fdd54ecdfc8"
+      schema_detected: "CISA_KEV_JSON_v1"
+      access_restrictions_encountered: "None. Standard CDN distribution with ETag caching."
+    format: "CISA_KEV_JSON"
+    access_method: "HTTPS_GET"
+    client_throttling:
+      proposed_internal_throttle_rps: 0.5
+      timeout_seconds: 30
+    restrictions:
+      terms_of_use: "US Government Public Domain."
+      redistribution_policy: "Unrestricted."
+    update_mechanism:
+      type: "ETAG_CONDITIONAL_FETCH"
+      poll_interval_hours: 24
+      supports_conditional_get: true
+    staging_notes: "Single snapshot cached for KEV enrichment. Missing status does not imply unexploited."
+
+  # ---------------------------------------------------------------------------
+  # Deferred Sources (Out of MVP Scope)
+  # ---------------------------------------------------------------------------
+  - id: "src_siemens_productcert"
+    publisher: "Siemens AG"
+    vendor_key: "siemens"
+    priority: "P2"
+    connector_status: "PLANNED"
+    format: "CSAF_2_0"
+    staging_notes: "Deferred from initial MVP. Planned for Phase 2."
+
+  - id: "src_yokogawa_ysar"
+    publisher: "Yokogawa Electric Corporation"
+    vendor_key: "yokogawa"
+    priority: "P2"
+    connector_status: "MANUAL_IMPORT_ONLY"
+    format: "VENDOR_HTML_INDEX"
+    staging_notes: "No public machine-readable CSAF endpoint verified during this discovery. Deferred from Phase 1 MVP."

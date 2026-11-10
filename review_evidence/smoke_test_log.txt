@@ -1,0 +1,34 @@
+=== INDUSPROBE ADVISORY MATCHER SMOKE TEST RUN ===
+Note: Fixtures evaluated are labeled synthetic fixtures.
+This output demonstrates algorithmic execution, NOT validated real CVE applicability.
+
+INGEST SEVD-2020-343-08 (SCHNEIDER) from tests/fixtures/advisories/sevd-2020-343-08.json: SUCCESS
+INGEST SEVD-2021-194-01 (SCHNEIDER) from tests/fixtures/advisories/sevd-2021-194-01.json: SUCCESS
+INGEST ICSA-22-090-05 (ROCKWELL) from tests/fixtures/advisories/icsa-22-090-05.json: SUCCESS
+Extracted Rules Total: 12
+  SEVD-2020-343-08     pid=1   < 3.20
+  SEVD-2020-343-08     pid=2   < 3.30
+  SEVD-2020-343-08     pid=3   [ALL VERSIONS]
+  SEVD-2020-343-08     pid=4   [ALL VERSIONS]
+  SEVD-2021-194-01     pid=3   < 15.0 SP1
+  SEVD-2021-194-01     pid=5   < 2021
+  SEVD-2021-194-01     pid=8   [ALL VERSIONS]
+  SEVD-2021-194-01     pid=9   < 3.50
+  SEVD-2021-194-01     pid=12  < SV4.21
+  SEVD-2021-194-01     pid=13  < SV4.10
+  ICSA-22-090-05       pid=R1  < v33.011
+  ICSA-22-090-05       pid=R2  < v33.011
+
+Assets Evaluated: 5
+  10.1.1.10       vendor=Schneider Electric model=Modicon M580 BMEP584040 fw=SV3.10 sw=None:None
+  10.1.1.11       vendor=Schneider Electric model=Modicon M340 BMXP342020 fw=None sw=None:None
+  10.1.1.50       vendor=Schneider Electric model=Engineering Workstation fw=None sw=EcoStruxure Control Expert:14.1
+  10.1.1.100      vendor=Rockwell Automation model=ControlLogix 5580 1756-L83E fw=v32.013 sw=None:None
+  10.1.1.200      vendor=Yokogawa model=CENTUM VP Field Control Station fw=R6.03 sw=None:None
+
+Evaluation Results Count: 44
+
+Result Counts by MatchState:
+  AFFECTED_PER_ADVISORY              : 8
+  NO_APPLICABLE_RULE_FOUND           : 33
+  PRODUCT_MATCH_VERSION_UNKNOWN      : 3

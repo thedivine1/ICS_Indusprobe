@@ -1,0 +1,119 @@
+{
+  "document": {
+    "title": "SEVD-2021-194-01 — Modicon Controllers and EcoStruxure Authentication Bypass",
+    "tracking": {
+      "id": "SEVD-2021-194-01",
+      "initial_release_date": "2021-07-13",
+      "current_release_date": "2022-01-11"
+    }
+  },
+  "product_tree": {
+    "branches": [
+      {
+        "category": "vendor",
+        "name": "Schneider Electric",
+        "branches": [
+          {
+            "category": "product_family",
+            "name": "EcoStruxure Control Expert",
+            "branches": [
+              {
+                "category": "product_version_range",
+                "name": "All versions prior to 15.0 SP1",
+                "product": {
+                  "product_id": "3",
+                  "name": "EcoStruxure Control Expert — All versions prior to 15.0 SP1"
+                }
+              }
+            ]
+          },
+          {
+            "category": "product_family",
+            "name": "EcoStruxure Process Expert",
+            "branches": [
+              {
+                "category": "product_version_range",
+                "name": "All versions prior to 2021",
+                "product": {
+                  "product_id": "5",
+                  "name": "EcoStruxure Process Expert — All versions prior to 2021"
+                }
+              }
+            ]
+          },
+          {
+            "category": "product_family",
+            "name": "Modicon M580",
+            "branches": [
+              {
+                "category": "product_version_range",
+                "name": "All versions",
+                "product": {
+                  "product_id": "8",
+                  "name": "Modicon M580 CPU — All versions"
+                }
+              },
+              {
+                "category": "product_version_range",
+                "name": "All versions prior to SV4.10",
+                "product": {
+                  "product_id": "13",
+                  "name": "Modicon M580 CPU — versions prior to SV4.10"
+                }
+              }
+            ]
+          },
+          {
+            "category": "product_family",
+            "name": "Modicon M340",
+            "branches": [
+              {
+                "category": "product_version_range",
+                "name": "All versions prior to 3.50",
+                "product": {
+                  "product_id": "9",
+                  "name": "Modicon M340 CPU — All versions prior to SV3.50"
+                }
+              }
+            ]
+          },
+          {
+            "category": "product_family",
+            "name": "Modicon M580 Safety",
+            "branches": [
+              {
+                "category": "product_version_range",
+                "name": "All versions prior to SV4.21",
+                "product": {
+                  "product_id": "12",
+                  "name": "Modicon M580 Safety (BMEP58*S/BMEH58*S) — All versions prior to SV4.21"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "vulnerabilities": [
+    {
+      "cve": "CVE-2021-22779",
+      "title": "Authentication Bypass by Spoofing via Modbus UMAS Protocol",
+      "product_status": {
+        "known_affected": ["3", "5", "8", "9", "12", "13"]
+      },
+      "scores": [
+        {
+          "source": "Schneider Electric",
+          "cvss_v3": {
+            "baseScore": 9.8,
+            "version": "3.1",
+            "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H"
+          }
+        }
+      ]
+    }
+  ],
+  "_fixture_note": "SYNTHETIC FIXTURE for offline testing. Based on official SEVD-2021-194-01 product structure verified at SHA-256 b5e3a325. Version strings reproduced verbatim from official advisory. NOT for use as an authoritative advisory — always retrieve from https://www.se.com/.well-known/csaf/2021/sevd-2021-194-01.json"
+}
+

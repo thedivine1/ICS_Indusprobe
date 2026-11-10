@@ -1,0 +1,1418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>IndusProbe_Demonstration_Cement_Plant_—_Clinker_Line_2_20261110</title>
+<style>
+    @page {
+        size: A4;
+        margin: 12mm 14mm 12mm 14mm;
+    }
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        line-height: 1.45;
+        color: #1e293b;
+        background: #ffffff;
+        margin: 0;
+        padding: 0;
+        font-size: 12px;
+    }
+    h1 {
+        color: #0f172a;
+        font-size: 20px;
+        font-weight: 800;
+        border-bottom: 2.5px solid #0f172a;
+        padding-bottom: 6px;
+        margin-top: 0;
+        margin-bottom: 10px;
+    }
+    h2 {
+        color: #0f172a;
+        font-size: 15px;
+        font-weight: 700;
+        border-bottom: 1.5px solid #cbd5e1;
+        padding-bottom: 4px;
+        margin-top: 20px;
+        margin-bottom: 8px;
+        page-break-after: avoid;
+    }
+    h3 {
+        color: #1e293b;
+        font-size: 13px;
+        font-weight: 600;
+        margin-top: 14px;
+        margin-bottom: 6px;
+        page-break-after: avoid;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 10px 0 14px 0;
+        font-size: 11px;
+        page-break-inside: avoid;
+    }
+    th {
+        background: #0f172a;
+        color: #f8fafc;
+        font-weight: 600;
+        text-align: left;
+        padding: 6px 8px;
+        border: 1px solid #1e293b;
+    }
+    td {
+        padding: 5px 8px;
+        border: 1px solid #cbd5e1;
+        vertical-align: top;
+    }
+    tr:nth-child(even) {
+        background: #f8fafc;
+    }
+    code {
+        background: #f1f5f9;
+        color: #0f172a;
+        padding: 1px 4px;
+        border-radius: 3px;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        font-size: 10.5px;
+    }
+    blockquote {
+        border-left: 3.5px solid #3b82f6;
+        background: #eff6ff;
+        padding: 8px 12px;
+        margin: 10px 0;
+        color: #1e3a8a;
+        border-radius: 0 4px 4px 0;
+        font-size: 11.5px;
+        page-break-inside: avoid;
+    }
+    .callout {
+        padding: 9px 12px;
+        margin: 10px 0;
+        border-radius: 4px;
+        font-size: 11.5px;
+        line-height: 1.4;
+        page-break-inside: avoid;
+    }
+    .callout-caution {
+        border-left: 4px solid #dc2626;
+        background: #fef2f2;
+        color: #991b1b;
+    }
+    hr {
+        border: none;
+        border-top: 1px solid #e2e8f0;
+        margin: 16px 0;
+    }
+    svg {
+        max-width: 100%;
+        height: auto;
+        display: block;
+        margin: 10px 0;
+        page-break-inside: avoid;
+    }
+    </style>
+</head>
+<body>
+<h1>OT Network Passive Assessment &amp; IEC 62443 Technical Analysis</h1>
+<blockquote>
+<p>⚠️ <strong>DEMONSTRATION REPORT — SYNTHETIC / LAB-GENERATED TRAFFIC</strong><br />
+Fictional cement manufacturing environment. Not an assessment of an actual customer installation.<br />
+Findings demonstrate analytical workflows and do not establish real-world asset vulnerabilities.</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>Metadata Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Facility / Context</strong></td>
+<td>Demonstration Cement Plant — Clinker Line 2</td>
+</tr>
+<tr>
+<td><strong>Simulated Unit</strong></td>
+<td>Synthetic 5,000 TPD Clinker Line (Demonstration Lab Environment)</td>
+</tr>
+<tr>
+<td><strong>Assessment Date</strong></td>
+<td>2026-11-10</td>
+</tr>
+<tr>
+<td><strong>Capture Telemetry</strong></td>
+<td>48 Hours Synthetic Baseline Telemetry (2026-11-08 08:00 to 2026-11-10 08:00 IST)</td>
+</tr>
+<tr>
+<td><strong>Total Packets Analysed</strong></td>
+<td>504,010 Ethernet frames</td>
+</tr>
+<tr>
+<td><strong>Engine &amp; Author</strong></td>
+<td>IndusProbe Assessment Engine</td>
+</tr>
+<tr>
+<td><strong>Reviewer Status</strong></td>
+<td>Draft — Subject to Engineering Review</td>
+</tr>
+<tr>
+<td><strong>Document Version</strong></td>
+<td>v1.1-demonstrator</td>
+</tr>
+<tr>
+<td><strong>Contact</strong></td>
+<td><code>contact@indusprobe.internal</code></td>
+</tr>
+<tr>
+<td><strong>Classification</strong></td>
+<td>DEMONSTRATION ONLY — Non-Operational Synthetic Data</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<blockquote>
+<p><strong>Analytical Methodology</strong>: The assessment component did not initiate active probes.
+Traffic generation/replay used to construct the lab dataset is documented separately.
+Zero active packets were transmitted into any operational or simulated OT segment.
+All technical observations are derived from passive packet header and application payload decoding.</p>
+</blockquote>
+<hr />
+<h2>1. Executive Summary</h2>
+<h3>Risk Summary</h3>
+<table>
+<thead>
+<tr>
+<th>Severity</th>
+<th>Count</th>
+<th>Initial Operational Treatment</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>🔴 CRITICAL</td>
+<td><strong>2</strong></td>
+<td>Urgent validation &amp; containment with plant engineering</td>
+</tr>
+<tr>
+<td>🟠 HIGH</td>
+<td><strong>6</strong></td>
+<td>Review in upcoming plant maintenance window</td>
+</tr>
+<tr>
+<td>🟡 MEDIUM</td>
+<td><strong>2</strong></td>
+<td>Planned remediation / configuration audit</td>
+</tr>
+<tr>
+<td>🟢 LOW</td>
+<td><strong>0</strong></td>
+<td>Routine architectural enhancement</td>
+</tr>
+<tr>
+<td>🔵 INFO</td>
+<td><strong>1</strong></td>
+<td>Documented baseline OT control activity</td>
+</tr>
+</tbody>
+</table>
+<h3>IEC 62443 Foundational Requirements Assessment</h3>
+<p>The table below maps observed telemetry to all seven IEC 62443-3-3:2018 Foundational Requirements (FRs):</p>
+<table>
+<thead>
+<tr>
+<th>Foundational Requirement (FR)</th>
+<th>Current Technical Posture</th>
+<th>Evaluated Target Scope</th>
+<th>Gap Summary</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>FR 1: IAC (Identification &amp; Authentication)</td>
+<td>⚠️ MEDIUM Findings</td>
+<td>Zone-Dependent (Established per IEC 62443-3-2 Risk Assessment)</td>
+<td>⚠️ 1 observation(s) requiring validation</td>
+</tr>
+<tr>
+<td>FR 2: UC (Use Control)</td>
+<td>⚠️ INFO Findings</td>
+<td>Zone-Dependent (Established per IEC 62443-3-2 Risk Assessment)</td>
+<td>⚠️ 1 observation(s) requiring validation</td>
+</tr>
+<tr>
+<td>FR 3: SI (System Integrity)</td>
+<td>⚠️ HIGH Findings</td>
+<td>Zone-Dependent (Established per IEC 62443-3-2 Risk Assessment)</td>
+<td>⚠️ 3 observation(s) requiring validation</td>
+</tr>
+<tr>
+<td>FR 4: DC (Data Confidentiality)</td>
+<td>⚠️ HIGH Findings</td>
+<td>Zone-Dependent (Established per IEC 62443-3-2 Risk Assessment)</td>
+<td>⚠️ 1 observation(s) requiring validation</td>
+</tr>
+<tr>
+<td>FR 5: RDF (Restricted Data Flow)</td>
+<td>⚠️ CRITICAL Findings</td>
+<td>Zone-Dependent (Established per IEC 62443-3-2 Risk Assessment)</td>
+<td>⚠️ 3 observation(s) requiring validation</td>
+</tr>
+<tr>
+<td>FR 6: TRE (Timely Response to Events)</td>
+<td>⚠️ HIGH Findings</td>
+<td>Zone-Dependent (Established per IEC 62443-3-2 Risk Assessment)</td>
+<td>⚠️ 2 observation(s) requiring validation</td>
+</tr>
+<tr>
+<td>FR 7: RA (Resource Availability)</td>
+<td>Not Assessed in Capture</td>
+<td>Zone-Dependent (Established per IEC 62443-3-2 Risk Assessment)</td>
+<td>Resource-availability controls not assessed; no selected availability anomaly detected within demonstrated capture.</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>IEC 62443 Security Level Status</strong>: Preliminary technical observations mapped to selected IEC 62443-3-3 requirements.
+Per IEC 62443-3-2, target security levels (SL-T) and achieved security levels (SL-A) are established per specific zone
+and conduit through formal risk assessment and system verification; overall plant-wide SL-A cannot be determined from passive telemetry alone.</p>
+</blockquote>
+<h3>Telemetry &amp; Accounting Basis</h3>
+<p>Passive packet capture accounted for <strong>504,010 total Ethernet frames</strong> across 15 distinct communication flows:</p>
+<ul>
+<li><strong>Asset Coverage</strong>: 12 unique assets (10 OT controllers/devices in lab manifest, 2 unclassified endpoints absent from reference inventory).</li>
+<li><strong>Protocol Metrics</strong>: 9 distinct protocols observed. Counts represent exact non-overlapping frame totals.</li>
+<li><strong>Process Control Write Activity</strong>: Deep Packet Inspection (DPI) identified <strong>3 distinct write-bearing command function codes</strong> (Modbus FC16 Write Multiple Registers, Modbus FC06 Write Single Register, and HART-IP Command 6 Write Polling Address) across 7 active write communication sessions.</li>
+<li><strong>Control Separation</strong>: Distinguishes valid process control baselines (e.g., M580 PLC commanding Kiln VFD) from unverified external control commands (e.g., Unregistered Dispatch PC writing to Packaging PLC).</li>
+</ul>
+<div class="callout callout-caution"><strong>⚠️ CRITICAL OPERATIONAL NOTICE:</strong> **2 CRITICAL finding(s) detected.** These represent cross-zone conduit flows and unauthenticated  external access into process controllers. Urgent validation with the plant operations owner is recommended prior  to applying firewall rules or port containment.</div>
+<hr />
+<h2>2. Asset Inventory (Passive Discovery)</h2>
+<p>The following assets were identified from passive traffic inspection. Endpoints marked ⚠️ were <strong>not</strong> in the
+lab reference inventory and require physical confirmation before applying isolation rules.</p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>IP Address</th>
+<th>MAC Address</th>
+<th>Vendor</th>
+<th>Device Type / Role</th>
+<th>Purdue Level</th>
+<th>Protocols Seen</th>
+<th>Identity Source</th>
+<th>Registry Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>10.20.10.11</code></td>
+<td><code>00:80:F4:A1:22:11</code></td>
+<td>Schneider Electric</td>
+<td>Modicon M580 Redundant ePAC (Kiln &amp; Preheater)</td>
+<td>Level 1</td>
+<td>Modbus TCP, Modbus UMAS (Schneider FC90), TCP/23 (Potential Telnet)</td>
+<td>Supplied by lab manifest</td>
+<td>✅ Registered</td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>10.20.10.12</code></td>
+<td><code>00:80:F4:A1:22:12</code></td>
+<td>Schneider Electric</td>
+<td>Modicon M580 PLC (Clinker Cooler &amp; TAD)</td>
+<td>Level 1</td>
+<td>Modbus TCP</td>
+<td>Supplied by lab manifest</td>
+<td>✅ Registered</td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>10.20.10.21</code></td>
+<td><code>00:80:F4:B2:33:01</code></td>
+<td>Schneider Electric</td>
+<td>Modicon M580 PLC (Crusher &amp; Raw Mill VRM)</td>
+<td>Level 1</td>
+<td>Modbus TCP, EtherNet/IP / CIP (Rockwell)</td>
+<td>Supplied by lab manifest</td>
+<td>✅ Registered</td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>10.20.10.31</code></td>
+<td><code>00:80:F4:C3:44:05</code></td>
+<td>Schneider Electric</td>
+<td>Modicon M580 PLC (Cement Mill &amp; Silos)</td>
+<td>Level 1</td>
+<td>Modbus TCP, DNP3</td>
+<td>Supplied by lab manifest</td>
+<td>✅ Registered</td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>10.20.10.41</code></td>
+<td><code>00:80:F4:D4:55:09</code></td>
+<td>Schneider Electric</td>
+<td>Modicon M340 PLC (Packing Plant &amp; Roto-Packer)</td>
+<td>Level 1</td>
+<td>Modbus TCP, EtherNet/IP / CIP (Rockwell)</td>
+<td>Supplied by lab manifest</td>
+<td>✅ Registered</td>
+</tr>
+<tr>
+<td>6</td>
+<td><code>10.20.10.101</code></td>
+<td><code>98:F4:AB:12:34:56</code></td>
+<td>Schneider Electric</td>
+<td>Altivar Process ATV930 VFD (Kiln Main Drive)</td>
+<td>Level 1</td>
+<td>Modbus TCP</td>
+<td>Supplied by lab manifest</td>
+<td>✅ Registered</td>
+</tr>
+<tr>
+<td>7</td>
+<td><code>10.20.10.150</code></td>
+<td><code>00:0A:DC:33:44:55</code></td>
+<td>Yokogawa</td>
+<td>CENTUM / HART-IP Gas Analyzer Gateway</td>
+<td>Level 1</td>
+<td>HART-IP (Yokogawa / Emerson)</td>
+<td>Supplied by lab manifest</td>
+<td>✅ Registered</td>
+</tr>
+<tr>
+<td>8</td>
+<td><code>10.20.20.15</code></td>
+<td><code>00:80:F4:99:11:22</code></td>
+<td>Schneider Electric</td>
+<td>Magelis / Harmony iPC HMI (Central Control Room)</td>
+<td>Level 2</td>
+<td>OPC-UA</td>
+<td>Supplied by lab manifest</td>
+<td>✅ Registered</td>
+</tr>
+<tr>
+<td>9</td>
+<td><code>10.20.30.10</code></td>
+<td><code>00:50:56:AA:11:01</code></td>
+<td>Schneider Electric</td>
+<td>EcoStruxure Plant SCADA Primary Server (Citect)</td>
+<td>Level 3</td>
+<td>Modbus TCP, OPC-UA, HART-IP (Yokogawa / Emerson), DNP3, SNMP, TCP/445 (Potential SMB)</td>
+<td>Supplied by lab manifest</td>
+<td>✅ Registered</td>
+</tr>
+<tr>
+<td>10</td>
+<td><code>10.20.30.50</code></td>
+<td><code>00:50:56:AA:11:50</code></td>
+<td>Schneider Electric</td>
+<td>Engineering Workstation (EcoStruxure Control Expert)</td>
+<td>Level 3</td>
+<td>Modbus UMAS (Schneider FC90)</td>
+<td>Supplied by lab manifest</td>
+<td>✅ Registered</td>
+</tr>
+<tr>
+<td>11</td>
+<td><code>10.20.30.99</code></td>
+<td><code>00:50:56:99:88:77</code></td>
+<td>Unknown</td>
+<td>Cement Dispatch &amp; SAP Billing PC</td>
+<td>Unclassified / External IT</td>
+<td>Modbus TCP, TCP/445 (Potential SMB)</td>
+<td>Inferred — unverified</td>
+<td>⚠️ <strong>NOT IN REGISTRY</strong></td>
+</tr>
+<tr>
+<td>12</td>
+<td><code>172.16.5.40</code></td>
+<td><code>00:0C:29:EE:FF:10</code></td>
+<td>Unknown</td>
+<td>Third-Party Burner Vendor Remote Support Laptop</td>
+<td>Unclassified / External IT</td>
+<td>TCP/23 (Potential Telnet)</td>
+<td>Inferred — unverified</td>
+<td>⚠️ <strong>NOT IN REGISTRY</strong></td>
+</tr>
+</tbody>
+</table>
+<h3>2.1 Purdue-Level Asset Grouping (Observed vs Reference Manifest)</h3>
+<p>Below is the automated Purdue structural asset map generated from passive packet traces and reference manifest data.
+Devices are color-coded: 🔴 <strong>Red</strong> (Unregistered endpoint / Critical attention), 🟡 <strong>Yellow</strong> (Attention required), 🟢 <strong>Green</strong> (No selected findings observed).</p>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 800" style="background:#f8fafc; border-radius:10px; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); width:100%; max-width:960px; height:auto;">
+<defs>
+  <filter id="shadow" x="-5%" y="-5%" width="110%" height="115%">
+    <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.08"/>
+  </filter>
+</defs>
+<!-- Header & Legend -->
+<rect x="0" y="0" width="960" height="60" fill="#0f172a" rx="10" ry="10" />
+<text x="24" y="32" font-size="14.5" font-weight="700" fill="#f8fafc">Purdue-Level Asset Grouping (Observed vs Reference Manifest)</text>
+<text x="24" y="48" font-size="10" fill="#94a3b8">Structural inventory grouping derived from passive telemetry and reference manifest (All 12 assets rendered)</text>
+<!-- Legend Items -->
+<rect x="530" y="24" width="12" height="12" rx="3" fill="#dc2626" />
+<text x="548" y="34" font-size="10.5" font-weight="600" fill="#f8fafc">Unregistered / Priority</text>
+<rect x="680" y="24" width="12" height="12" rx="3" fill="#f59e0b" />
+<text x="698" y="34" font-size="10.5" font-weight="600" fill="#f8fafc">Attention Required</text>
+<rect x="810" y="24" width="12" height="12" rx="3" fill="#10b981" />
+<text x="828" y="34" font-size="10.5" font-weight="600" fill="#f8fafc">No Findings Observed</text>
+<rect x="18" y="80" width="924" height="137" rx="8" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1.5" />
+<text x="32" y="102" font-size="11.5" font-weight="700" fill="#334155" letter-spacing="0.5">LEVEL 3: OPERATIONS &amp; SCADA (2 Assets)</text>
+<g filter="url(#shadow)"><rect x="32" y="112" width="210" height="80" rx="6" fill="#FFFBEB" stroke="#F59E0B" stroke-width="2" /><rect x="38" y="118" width="198" height="15" rx="3" fill="#F59E0B" /><text x="137.0" y="129" font-size="8.5" font-weight="700" fill="#ffffff" text-anchor="middle">ATTENTION REQUIRED</text><text x="42" y="149" font-size="11.5" font-weight="700" fill="#0f172a">Schneider Electric</text><text x="42" y="164" font-size="10" fill="#475569">EcoStruxure Plant SCADA ...</text><text x="42" y="181" font-size="10.5" font-weight="600" fill="#2563eb" font-family="monospace">10.20.30.10</text></g>
+<g filter="url(#shadow)"><rect x="260" y="112" width="210" height="80" rx="6" fill="#ECFDF5" stroke="#10B981" stroke-width="2" /><rect x="266" y="118" width="198" height="15" rx="3" fill="#10B981" /><text x="365.0" y="129" font-size="8.5" font-weight="700" fill="#ffffff" text-anchor="middle">NO FINDINGS OBSERVED</text><text x="270" y="149" font-size="11.5" font-weight="700" fill="#0f172a">Schneider Electric</text><text x="270" y="164" font-size="10" fill="#475569">Engineering Workstation ...</text><text x="270" y="181" font-size="10.5" font-weight="600" fill="#2563eb" font-family="monospace">10.20.30.50</text></g>
+<rect x="18" y="232" width="924" height="137" rx="8" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1.5" />
+<text x="32" y="254" font-size="11.5" font-weight="700" fill="#334155" letter-spacing="0.5">LEVEL 2: AREA SUPERVISION (HMI / EWS) (1 Asset)</text>
+<g filter="url(#shadow)"><rect x="32" y="264" width="210" height="80" rx="6" fill="#ECFDF5" stroke="#10B981" stroke-width="2" /><rect x="38" y="270" width="198" height="15" rx="3" fill="#10B981" /><text x="137.0" y="281" font-size="8.5" font-weight="700" fill="#ffffff" text-anchor="middle">NO FINDINGS OBSERVED</text><text x="42" y="301" font-size="11.5" font-weight="700" fill="#0f172a">Schneider Electric</text><text x="42" y="316" font-size="10" fill="#475569">Magelis / Harmony iPC HM...</text><text x="42" y="333" font-size="10.5" font-weight="600" fill="#2563eb" font-family="monospace">10.20.20.15</text></g>
+<rect x="18" y="384" width="924" height="229" rx="8" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1.5" />
+<text x="32" y="406" font-size="11.5" font-weight="700" fill="#334155" letter-spacing="0.5">LEVEL 1: BASIC CONTROL (PLCS / RTUS / DRIVES) (7 Assets)</text>
+<g filter="url(#shadow)"><rect x="32" y="416" width="210" height="80" rx="6" fill="#FEF2F2" stroke="#DC2626" stroke-width="2" /><rect x="38" y="422" width="198" height="15" rx="3" fill="#DC2626" /><text x="137.0" y="433" font-size="8.5" font-weight="700" fill="#ffffff" text-anchor="middle">CRITICAL ATTENTION</text><text x="42" y="453" font-size="11.5" font-weight="700" fill="#0f172a">Schneider Electric</text><text x="42" y="468" font-size="10" fill="#475569">Modicon M580 Redundant e...</text><text x="42" y="485" font-size="10.5" font-weight="600" fill="#2563eb" font-family="monospace">10.20.10.11</text></g>
+<g filter="url(#shadow)"><rect x="260" y="416" width="210" height="80" rx="6" fill="#FFFBEB" stroke="#F59E0B" stroke-width="2" /><rect x="266" y="422" width="198" height="15" rx="3" fill="#F59E0B" /><text x="365.0" y="433" font-size="8.5" font-weight="700" fill="#ffffff" text-anchor="middle">CLEARTEXT PROTOCOL</text><text x="270" y="453" font-size="11.5" font-weight="700" fill="#0f172a">Schneider Electric</text><text x="270" y="468" font-size="10" fill="#475569">Modicon M580 PLC (Clinke...</text><text x="270" y="485" font-size="10.5" font-weight="600" fill="#2563eb" font-family="monospace">10.20.10.12</text></g>
+<g filter="url(#shadow)"><rect x="488" y="416" width="210" height="80" rx="6" fill="#FFFBEB" stroke="#F59E0B" stroke-width="2" /><rect x="494" y="422" width="198" height="15" rx="3" fill="#F59E0B" /><text x="593.0" y="433" font-size="8.5" font-weight="700" fill="#ffffff" text-anchor="middle">CLEARTEXT PROTOCOL</text><text x="498" y="453" font-size="11.5" font-weight="700" fill="#0f172a">Schneider Electric</text><text x="498" y="468" font-size="10" fill="#475569">Modicon M580 PLC (Crushe...</text><text x="498" y="485" font-size="10.5" font-weight="600" fill="#2563eb" font-family="monospace">10.20.10.21</text></g>
+<g filter="url(#shadow)"><rect x="716" y="416" width="210" height="80" rx="6" fill="#FFFBEB" stroke="#F59E0B" stroke-width="2" /><rect x="722" y="422" width="198" height="15" rx="3" fill="#F59E0B" /><text x="821.0" y="433" font-size="8.5" font-weight="700" fill="#ffffff" text-anchor="middle">CLEARTEXT PROTOCOL</text><text x="726" y="453" font-size="11.5" font-weight="700" fill="#0f172a">Schneider Electric</text><text x="726" y="468" font-size="10" fill="#475569">Modicon M580 PLC (Cement...</text><text x="726" y="485" font-size="10.5" font-weight="600" fill="#2563eb" font-family="monospace">10.20.10.31</text></g>
+<g filter="url(#shadow)"><rect x="32" y="508" width="210" height="80" rx="6" fill="#FEF2F2" stroke="#DC2626" stroke-width="2" /><rect x="38" y="514" width="198" height="15" rx="3" fill="#DC2626" /><text x="137.0" y="525" font-size="8.5" font-weight="700" fill="#ffffff" text-anchor="middle">CRITICAL ATTENTION</text><text x="42" y="545" font-size="11.5" font-weight="700" fill="#0f172a">Schneider Electric</text><text x="42" y="560" font-size="10" fill="#475569">Modicon M340 PLC (Packin...</text><text x="42" y="577" font-size="10.5" font-weight="600" fill="#2563eb" font-family="monospace">10.20.10.41</text></g>
+<g filter="url(#shadow)"><rect x="260" y="508" width="210" height="80" rx="6" fill="#FFFBEB" stroke="#F59E0B" stroke-width="2" /><rect x="266" y="514" width="198" height="15" rx="3" fill="#F59E0B" /><text x="365.0" y="525" font-size="8.5" font-weight="700" fill="#ffffff" text-anchor="middle">CLEARTEXT PROTOCOL</text><text x="270" y="545" font-size="11.5" font-weight="700" fill="#0f172a">Schneider Electric</text><text x="270" y="560" font-size="10" fill="#475569">Altivar Process ATV930 V...</text><text x="270" y="577" font-size="10.5" font-weight="600" fill="#2563eb" font-family="monospace">10.20.10.101</text></g>
+<g filter="url(#shadow)"><rect x="488" y="508" width="210" height="80" rx="6" fill="#FFFBEB" stroke="#F59E0B" stroke-width="2" /><rect x="494" y="514" width="198" height="15" rx="3" fill="#F59E0B" /><text x="593.0" y="525" font-size="8.5" font-weight="700" fill="#ffffff" text-anchor="middle">CLEARTEXT PROTOCOL</text><text x="498" y="545" font-size="11.5" font-weight="700" fill="#0f172a">Yokogawa</text><text x="498" y="560" font-size="10" fill="#475569">CENTUM / HART-IP Gas Ana...</text><text x="498" y="577" font-size="10.5" font-weight="600" fill="#2563eb" font-family="monospace">10.20.10.150</text></g>
+<rect x="18" y="628" width="924" height="137" rx="8" fill="#fef2f2" stroke="#fecaca" stroke-width="1.5" />
+<text x="32" y="650" font-size="11.5" font-weight="700" fill="#334155" letter-spacing="0.5">UNCLASSIFIED / EXTERNAL IT (2 Assets)</text>
+<g filter="url(#shadow)"><rect x="32" y="660" width="210" height="80" rx="6" fill="#FEF2F2" stroke="#DC2626" stroke-width="2" /><rect x="38" y="666" width="198" height="15" rx="3" fill="#DC2626" /><text x="137.0" y="677" font-size="8.5" font-weight="700" fill="#ffffff" text-anchor="middle">UNREGISTERED — VALIDATE</text><text x="42" y="697" font-size="11.5" font-weight="700" fill="#0f172a">Unknown</text><text x="42" y="712" font-size="10" fill="#475569">Cement Dispatch &amp; SAP Bi...</text><text x="42" y="729" font-size="10.5" font-weight="600" fill="#2563eb" font-family="monospace">10.20.30.99</text></g>
+<g filter="url(#shadow)"><rect x="260" y="660" width="210" height="80" rx="6" fill="#FEF2F2" stroke="#DC2626" stroke-width="2" /><rect x="266" y="666" width="198" height="15" rx="3" fill="#DC2626" /><text x="365.0" y="677" font-size="8.5" font-weight="700" fill="#ffffff" text-anchor="middle">UNREGISTERED — VALIDATE</text><text x="270" y="697" font-size="11.5" font-weight="700" fill="#0f172a">Unknown</text><text x="270" y="712" font-size="10" fill="#475569">Third-Party Burner Vendo...</text><text x="270" y="729" font-size="10.5" font-weight="600" fill="#2563eb" font-family="monospace">172.16.5.40</text></g>
+</svg>
+<h3>2.2 Vendor-Specific Hardware Vulnerabilities (CISA / Authoritative Advisory Cross-Reference)</h3>
+<p>Discovered asset hardware and controllers match the following published OT advisories.
+Because passive analysis cannot inspect internal firmware binaries, unverified versions are reported as candidate advisories:</p>
+<table>
+<thead>
+<tr>
+<th>Identified Product</th>
+<th>Identification Basis</th>
+<th>Installed Version</th>
+<th>Affected Range</th>
+<th>Applicability Status</th>
+<th>Source Advisory</th>
+<th>Recommended Action</th>
+<th>Affected Asset IDs</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Modicon M580, M340, Quantum Controllers &amp; EcoStruxure Control Expert</td>
+<td>Supplied by lab manifest</td>
+<td>Unknown (Passive capture cannot query internal firmware)</td>
+<td>Modicon M580 (all versions), M340 (all versions), EcoStruxure Control Expert (&lt; V15.0 SP1)</td>
+<td>Candidate advisory — firmware / version validation required</td>
+<td><a href="https://www.cisa.gov/news-events/ics-advisories/icsa-21-194-01">CVE-2021-22779 (ICSA-21-194-01)</a></td>
+<td>Validate controller firmware &amp; Control Expert version; configure IP Access Control Lists (ACL) in Control Expert; restrict port 502 to authorized engineering/SCADA stations.</td>
+<td><code>10.20.10.11</code> (Modicon M580 Redundant ePAC (Kiln &amp; Preheater))<br><code>10.20.10.12</code> (Modicon M580 PLC (Clinker Cooler &amp; TAD))<br><code>10.20.10.21</code> (Modicon M580 PLC (Crusher &amp; Raw Mill VRM))<br><code>10.20.10.31</code> (Modicon M580 PLC (Cement Mill &amp; Silos))<br><code>10.20.10.41</code> (Modicon M340 PLC (Packing Plant &amp; Roto-Packer))<br><code>10.20.30.50</code> (Engineering Workstation (EcoStruxure Control Expert))</td>
+</tr>
+<tr>
+<td>Modicon M340 &amp; Quantum Controllers</td>
+<td>Supplied by lab manifest</td>
+<td>Unknown (Passive capture cannot query internal firmware)</td>
+<td>Modicon M340 (all versions prior to BMXP34 SV3.30), Quantum (all versions)</td>
+<td>Candidate advisory — firmware / version validation required</td>
+<td><a href="https://www.cisa.gov/news-events/ics-advisories/icsa-20-343-04">CVE-2020-7537 (ICSA-20-343-04)</a></td>
+<td>Deploy network conduit ACLs to restrict Modbus port 502 strictly to authorized SCADA polling servers; schedule firmware update during planned turnaround.</td>
+<td><code>10.20.10.41</code> (Modicon M340 PLC (Packing Plant &amp; Roto-Packer))</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>3. OT Protocol Map</h2>
+<table>
+<thead>
+<tr>
+<th>Protocol</th>
+<th>Packets</th>
+<th>Share</th>
+<th>Risk Level</th>
+<th>Encryption / Cryptographic Protection</th>
+<th>Authentication Mechanism</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Modbus TCP</td>
+<td>287,700</td>
+<td>57.1%</td>
+<td>HIGH</td>
+<td>❌ None (Plaintext byte stream)</td>
+<td>❌ None (No station auth)</td>
+</tr>
+<tr>
+<td>OPC-UA</td>
+<td>82,100</td>
+<td>16.3%</td>
+<td>VARIABLE</td>
+<td>⚠️ Depends on negotiated SecurityPolicy (SignAndEncrypt vs None)</td>
+<td>✅ X.509 Certificates / User tokens</td>
+</tr>
+<tr>
+<td>Modbus UMAS (Schneider FC90)</td>
+<td>42,000</td>
+<td>8.3%</td>
+<td>HIGH</td>
+<td>❌ None (Proprietary engineering byte stream)</td>
+<td>⚠️ Application-level password</td>
+</tr>
+<tr>
+<td>SNMP</td>
+<td>31,200</td>
+<td>6.2%</td>
+<td>MEDIUM</td>
+<td>⚠️ Depends on version (SNMPv1/v2c cleartext; SNMPv3 authPriv encrypted)</td>
+<td>⚠️ Community string in v1/v2c</td>
+</tr>
+<tr>
+<td>HART-IP (Yokogawa / Emerson)</td>
+<td>24,800</td>
+<td>4.9%</td>
+<td>HIGH</td>
+<td>⚠️ FieldComm Group standard supports TLS/DTLS; unencrypted in observed flow</td>
+<td>❌ None in observed flow</td>
+</tr>
+<tr>
+<td>EtherNet/IP / CIP (Rockwell)</td>
+<td>18,400</td>
+<td>3.7%</td>
+<td>HIGH</td>
+<td>❌ None</td>
+<td>⚠️ CIP Security optional</td>
+</tr>
+<tr>
+<td>DNP3</td>
+<td>16,620</td>
+<td>3.3%</td>
+<td>HIGH</td>
+<td>❌ None</td>
+<td>⚠️ DNP3-SA optional</td>
+</tr>
+<tr>
+<td>TCP/445 (Potential SMB)</td>
+<td>850</td>
+<td>0.2%</td>
+<td>HIGH</td>
+<td>⚠️ SMB encryption optional (v3.0+); unauthenticated/cleartext in v1</td>
+<td>⚠️ NTLM / Kerberos (Depends on domain)</td>
+</tr>
+<tr>
+<td>TCP/23 (Potential Telnet)</td>
+<td>340</td>
+<td>0.1%</td>
+<td>CRITICAL</td>
+<td>❌ None (Cleartext interactive CLI)</td>
+<td>❌ Cleartext password in transit</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>4. IEC 62443 Technical Findings</h2>
+<h3>Finding 01 — 🔴 CRITICAL: Unregistered endpoints communicating with simulated Level 1 controllers</h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>IEC 62443 Control</strong></td>
+<td>SR 5.1 — Network Segmentation</td>
+</tr>
+<tr>
+<td><strong>Severity</strong></td>
+<td>CRITICAL</td>
+</tr>
+<tr>
+<td><strong>Evidence Confidence</strong></td>
+<td>High (Observed in packet trace)</td>
+</tr>
+<tr>
+<td><strong>Validation Status</strong></td>
+<td>Observed in telemetry — Requires plant engineering confirmation</td>
+</tr>
+<tr>
+<td><strong>Target Security Level</strong></td>
+<td>Zone-dependent (Evaluated against IEC 62443-3-3:2018 Technical Requirements)</td>
+</tr>
+<tr>
+<td><strong>NIST SP 800-82 Reference</strong></td>
+<td>NIST SP 800-82 Rev. 3 §5.1 (Network Segmentation) &amp; §5.2 (Boundary Protection)</td>
+</tr>
+<tr>
+<td><strong>MITRE ATT&amp;CK for ICS</strong></td>
+<td>T0886 — Remote Services</td>
+</tr>
+<tr>
+<td><strong>Risk Rationale</strong></td>
+<td>Direct external or corporate access to Level 1 controllers creates potential pathways for unauthorized process alteration or ransomware propagation.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Observed Telemetry Evidence:</strong></p>
+<blockquote>
+<p>Observed 2 communication session(s) where endpoints absent from the lab reference inventory (10.20.30.99, 172.16.5.40) directly target Level 1 process controllers (10.20.10.11, 10.20.10.41). Scenario context: The lab manifest designates these endpoints as dispatch and vendor-support systems. Not established by traffic alone: Actual device ownership, permitted conduits, intervening firewall controls, or operational necessity.</p>
+</blockquote>
+<p><strong>Recommended Action:</strong></p>
+<blockquote>
+<p>Conduct urgent engineering walkdown and review with plant operations before applying isolation. Validate whether these connections serve legitimate operational workflows. If valid, formally document them in the plant asset registry and establish approved conduit boundary rules. If unauthorized, coordinate containment and port isolation with the operations owner.</p>
+</blockquote>
+<p><strong>Associated Endpoints:</strong> 10.20.30.99, 172.16.5.40, 10.20.10.11, 10.20.10.41</p>
+<h3>Finding 02 — 🔴 CRITICAL: TCP/23 (Potential Telnet) unencrypted session observed targeting process controller</h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>IEC 62443 Control</strong></td>
+<td>SR 5.2 — Zone Boundary Protection</td>
+</tr>
+<tr>
+<td><strong>Severity</strong></td>
+<td>CRITICAL</td>
+</tr>
+<tr>
+<td><strong>Evidence Confidence</strong></td>
+<td>Medium (Port-based heuristic; payload unparsed)</td>
+</tr>
+<tr>
+<td><strong>Validation Status</strong></td>
+<td>Observed in telemetry — Requires vendor tool confirmation</td>
+</tr>
+<tr>
+<td><strong>Target Security Level</strong></td>
+<td>Zone-dependent (Evaluated against IEC 62443-3-3:2018 Technical Requirements)</td>
+</tr>
+<tr>
+<td><strong>NIST SP 800-82 Reference</strong></td>
+<td>NIST SP 800-82 Rev. 3 §5.3 (Remote Access) &amp; §6.2.6 (System and Communications Protection)</td>
+</tr>
+<tr>
+<td><strong>MITRE ATT&amp;CK for ICS</strong></td>
+<td>T0886 — Remote Services</td>
+</tr>
+<tr>
+<td><strong>Risk Rationale</strong></td>
+<td>Unencrypted interactive remote administration allows passive eavesdropping and session hijacking if network perimeter is traversed.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Observed Telemetry Evidence:</strong></p>
+<blockquote>
+<p>Observed TCP port 23 traffic: 172.16.5.40 → 10.20.10.11 (340 packets). Application parsing is port-based heuristic. Telnet transport protocol transmits data without native encryption; if interactive authentication occurred, credentials could be exposed to passive monitoring. Actual credential exposure was not parsed in the captured sample.</p>
+</blockquote>
+<p><strong>Recommended Action:</strong></p>
+<blockquote>
+<p>Validate operational dependencies urgently with designated plant engineering. Determine if controller firmware supports SSH or secure vendor tools. If remote administration is required, restrict traffic via an authenticated Level 3.5 DMZ jump host with MFA. Disable legacy Telnet services during the next scheduled plant maintenance window.</p>
+</blockquote>
+<p><strong>Associated Endpoints:</strong> 172.16.5.40, 10.20.10.11</p>
+<h3>Finding 03 — 🟠 HIGH: TCP/445 (Potential SMB) file-sharing traffic detected targeting supervisory server</h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>IEC 62443 Control</strong></td>
+<td>SR 5.2 — Zone Boundary Protection</td>
+</tr>
+<tr>
+<td><strong>Severity</strong></td>
+<td>HIGH</td>
+</tr>
+<tr>
+<td><strong>Evidence Confidence</strong></td>
+<td>Medium (Port-based heuristic)</td>
+</tr>
+<tr>
+<td><strong>Validation Status</strong></td>
+<td>Observed in telemetry — Requires operational verification</td>
+</tr>
+<tr>
+<td><strong>Target Security Level</strong></td>
+<td>Zone-dependent (Evaluated against IEC 62443-3-3:2018 Technical Requirements)</td>
+</tr>
+<tr>
+<td><strong>NIST SP 800-82 Reference</strong></td>
+<td>NIST SP 800-82 Rev. 3 §5.2 (Boundary Protection)</td>
+</tr>
+<tr>
+<td><strong>MITRE ATT&amp;CK for ICS</strong></td>
+<td>T0867 — Lateral Tool Transfer</td>
+</tr>
+<tr>
+<td><strong>Risk Rationale</strong></td>
+<td>SMB file-sharing across trust zones is the primary propagation vector for commodity ransomware in industrial environments.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Observed Telemetry Evidence:</strong></p>
+<blockquote>
+<p>Observed TCP port 445 traffic: 10.20.30.99 → 10.20.30.10 (850 packets). Application parsing is port-based heuristic. Direct workstation-to-SCADA file sharing introduces potential malware propagation vectors.</p>
+</blockquote>
+<p><strong>Recommended Action:</strong></p>
+<blockquote>
+<p>Review business necessity of SMB file sharing. Validate whether backup or historian workflows require port 445. Ensure legacy SMBv1 is disabled. Apply conduit filtering at the boundary firewall, and use secure transfer mechanisms (SFTP/HTTPS) where required.</p>
+</blockquote>
+<p><strong>Associated Endpoints:</strong> 10.20.30.99, 10.20.30.10</p>
+<h3>Finding 04 — 🟠 HIGH: Legacy Modbus communication without native cryptographic protection — compensating controls require review</h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>IEC 62443 Control</strong></td>
+<td>SR 3.1 — Communication Integrity</td>
+</tr>
+<tr>
+<td><strong>Severity</strong></td>
+<td>HIGH</td>
+</tr>
+<tr>
+<td><strong>Evidence Confidence</strong></td>
+<td>High (Observed in packet trace)</td>
+</tr>
+<tr>
+<td><strong>Validation Status</strong></td>
+<td>Observed in telemetry — Protocol design property</td>
+</tr>
+<tr>
+<td><strong>Target Security Level</strong></td>
+<td>Zone-dependent (Evaluated against IEC 62443-3-3:2018 Technical Requirements)</td>
+</tr>
+<tr>
+<td><strong>NIST SP 800-82 Reference</strong></td>
+<td>NIST SP 800-82 Rev. 3 §6.2.6 (System and Communications Protection)</td>
+</tr>
+<tr>
+<td><strong>MITRE ATT&amp;CK for ICS</strong></td>
+<td>T0831 — Manipulate I&amp;C</td>
+</tr>
+<tr>
+<td><strong>Risk Rationale</strong></td>
+<td>Industrial protocols lacking cryptographic authentication permit unauthorized register reads and setpoint overrides if network perimeters are breached.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Observed Telemetry Evidence:</strong></p>
+<blockquote>
+<p>Observed 287,700 Modbus TCP packets across 7 active communication sessions. Standard Modbus protocol specification (port 502) lacks native message encryption and station authentication. Commands and telemetry are transmitted in cleartext, meaning any host with network connectivity can read or issue registers unless constrained by external network controls.</p>
+</blockquote>
+<p><strong>Recommended Action:</strong></p>
+<blockquote>
+<p>Implement network-level compensating controls: enforce strict VLAN boundaries, implement switch-port IP/MAC ACLs, and deploy industrial firewall inspection to permit only approved Modbus function codes between validated SCADA servers and controllers. Enable controller-level access control tables (e.g. Modicon M580 Security ACLs) in Control Expert.</p>
+</blockquote>
+<h3>Finding 05 — 🟠 HIGH: Insecure OPC-UA Channel Configuration (SecurityPolicy#None observed)</h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>IEC 62443 Control</strong></td>
+<td>SR 4.1 — Information Confidentiality</td>
+</tr>
+<tr>
+<td><strong>Severity</strong></td>
+<td>HIGH</td>
+</tr>
+<tr>
+<td><strong>Evidence Confidence</strong></td>
+<td>High (Observed in packet trace)</td>
+</tr>
+<tr>
+<td><strong>Validation Status</strong></td>
+<td>Observed in telemetry</td>
+</tr>
+<tr>
+<td><strong>Target Security Level</strong></td>
+<td>Zone-dependent (Evaluated against IEC 62443-3-3:2018 Technical Requirements)</td>
+</tr>
+<tr>
+<td><strong>NIST SP 800-82 Reference</strong></td>
+<td>NIST SP 800-82 Rev. 3 §6.2.6 (System and Communications Protection)</td>
+</tr>
+<tr>
+<td><strong>MITRE ATT&amp;CK for ICS</strong></td>
+<td>T0855 — Unauthorized Command Message</td>
+</tr>
+<tr>
+<td><strong>Risk Rationale</strong></td>
+<td>Cleartext OPC-UA allows MITM manipulation of supervisory process telemetry and setpoints.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Observed Telemetry Evidence:</strong></p>
+<blockquote>
+<p>Observed 1 OPC-UA TCP session(s) where channel handshake negotiated SecurityPolicy#None. The OPC-UA SecureChannel was established without cryptographic message signing or encryption. Process variables, setpoints, and session tokens are exposed in cleartext to passive eavesdropping on this channel.</p>
+</blockquote>
+<p><strong>Recommended Action:</strong></p>
+<blockquote>
+<p>Validate operational dependencies with SCADA/HMI vendor. During a planned engineering window, configure OPC-UA servers and clients to require MessageSecurityMode 'SignAndEncrypt' with SecurityPolicy 'Basic256Sha256' or 'Aes128_Sha256_RsaOaep'. Deploy managed X.509 certificates to replace 'None' endpoints.</p>
+</blockquote>
+<h3>Finding 06 — 🟠 HIGH: HART-IP field communication decoded in cleartext — gateway configuration requires review</h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>IEC 62443 Control</strong></td>
+<td>SR 3.1 — Communication Integrity</td>
+</tr>
+<tr>
+<td><strong>Severity</strong></td>
+<td>HIGH</td>
+</tr>
+<tr>
+<td><strong>Evidence Confidence</strong></td>
+<td>High (Observed in packet trace)</td>
+</tr>
+<tr>
+<td><strong>Validation Status</strong></td>
+<td>Observed in telemetry — Gateway capabilities unconfirmed</td>
+</tr>
+<tr>
+<td><strong>Target Security Level</strong></td>
+<td>Zone-dependent (Evaluated against IEC 62443-3-3:2018 Technical Requirements)</td>
+</tr>
+<tr>
+<td><strong>NIST SP 800-82 Reference</strong></td>
+<td>NIST SP 800-82 Rev. 3 §6.2.6 (System and Communications Protection)</td>
+</tr>
+<tr>
+<td><strong>MITRE ATT&amp;CK for ICS</strong></td>
+<td>T0836 — Modify Parameter</td>
+</tr>
+<tr>
+<td><strong>Risk Rationale</strong></td>
+<td>Unencrypted gateway communication allows potential parameter tampering or spoofed readings if conduit access is unrestricted.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Observed Telemetry Evidence:</strong></p>
+<blockquote>
+<p>The demonstrated HART-IP exchange was decoded in cleartext across 1 session(s). FieldComm Group HART-IP specifications support secure TLS/DTLS profiles; security capabilities and configuration of the represented gateway require validation. Scenario assumptions regarding process telemetry require on-site verification against instrument tag databases.</p>
+</blockquote>
+<p><strong>Recommended Action:</strong></p>
+<blockquote>
+<p>Validate whether deployed gateway hardware supports HART-IP security profiles (TLS/DTLS). If unencrypted legacy operation is required, enforce network-level conduit isolation via a dedicated VLAN with switch ACL allowlists restricting traffic strictly to authorized supervisory controllers.</p>
+</blockquote>
+<h3>Finding 07 — 🟠 HIGH: 2 unregistered active endpoint(s) detected on control network</h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>IEC 62443 Control</strong></td>
+<td>SR 6.2 — Continuous Monitoring</td>
+</tr>
+<tr>
+<td><strong>Severity</strong></td>
+<td>HIGH</td>
+</tr>
+<tr>
+<td><strong>Evidence Confidence</strong></td>
+<td>High (Observed in packet trace)</td>
+</tr>
+<tr>
+<td><strong>Validation Status</strong></td>
+<td>Observed in telemetry — Requires physical walkdown</td>
+</tr>
+<tr>
+<td><strong>Target Security Level</strong></td>
+<td>Zone-dependent (Evaluated against IEC 62443-3-3:2018 Technical Requirements)</td>
+</tr>
+<tr>
+<td><strong>NIST SP 800-82 Reference</strong></td>
+<td>NIST SP 800-82 Rev. 3 §5.1 (Network Segmentation) &amp; §6.2.2</td>
+</tr>
+<tr>
+<td><strong>MITRE ATT&amp;CK for ICS</strong></td>
+<td>T0886 — Remote Services</td>
+</tr>
+<tr>
+<td><strong>Risk Rationale</strong></td>
+<td>Unmanaged assets on control segments introduce unpatched operating systems and unauthorized bridging pathways.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Observed Telemetry Evidence:</strong></p>
+<blockquote>
+<p>The following IP addresses were observed generating active traffic but are absent from the lab reference inventory: 10.20.30.99, 172.16.5.40. Identities are inferred from observed traffic behaviors.</p>
+</blockquote>
+<p><strong>Recommended Action:</strong></p>
+<blockquote>
+<p>Conduct a physical walkdown to confirm device ownership, physical switch port location, and business necessity. Update the asset inventory accordingly. Quarantine any endpoint that cannot be validated by plant operations.</p>
+</blockquote>
+<h3>Finding 08 — 🟠 HIGH: Cleartext industrial protocol in use: DNP3</h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>IEC 62443 Control</strong></td>
+<td>SR 3.1 — Communication Integrity</td>
+</tr>
+<tr>
+<td><strong>Severity</strong></td>
+<td>HIGH</td>
+</tr>
+<tr>
+<td><strong>Evidence Confidence</strong></td>
+<td>High (Observed in packet trace)</td>
+</tr>
+<tr>
+<td><strong>Validation Status</strong></td>
+<td>Observed in telemetry</td>
+</tr>
+<tr>
+<td><strong>Target Security Level</strong></td>
+<td>Zone-dependent (Evaluated against IEC 62443-3-3:2018 Technical Requirements)</td>
+</tr>
+<tr>
+<td><strong>NIST SP 800-82 Reference</strong></td>
+<td>NIST SP 800-82 Rev. 3 §6.2.6 (System and Communications Protection)</td>
+</tr>
+<tr>
+<td><strong>MITRE ATT&amp;CK for ICS</strong></td>
+<td>T0831 — Manipulate I&amp;C</td>
+</tr>
+<tr>
+<td><strong>Risk Rationale</strong></td>
+<td>Cleartext DNP3 allows unauthorized command injection if substation network boundaries are breached.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Observed Telemetry Evidence:</strong></p>
+<blockquote>
+<p>Observed 16,620 DNP3 packets without cryptographic authentication. DNP3 Secure Authentication (DNP3-SA) was not detected in the captured traffic.</p>
+</blockquote>
+<p><strong>Recommended Action:</strong></p>
+<blockquote>
+<p>Where supported by substation equipment, evaluate enabling DNP3-SA (IEEE 1815-2012). For legacy installations, isolate DNP3 circuits onto dedicated VLAN conduits with restricted routing.</p>
+</blockquote>
+<h3>Finding 09 — 🟡 MEDIUM: No identified log-forwarding traffic observed within capture coverage</h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>IEC 62443 Control</strong></td>
+<td>SR 6.2 — Continuous Monitoring</td>
+</tr>
+<tr>
+<td><strong>Severity</strong></td>
+<td>MEDIUM</td>
+</tr>
+<tr>
+<td><strong>Evidence Confidence</strong></td>
+<td>Medium (Absence of traffic in monitored TAP span)</td>
+</tr>
+<tr>
+<td><strong>Validation Status</strong></td>
+<td>Observed in telemetry — Scope validation required</td>
+</tr>
+<tr>
+<td><strong>Target Security Level</strong></td>
+<td>Zone-dependent (Evaluated against IEC 62443-3-3:2018 Technical Requirements)</td>
+</tr>
+<tr>
+<td><strong>NIST SP 800-82 Reference</strong></td>
+<td>NIST SP 800-82 Rev. 3 §6.2.4 (Audit and Accountability)</td>
+</tr>
+<tr>
+<td><strong>MITRE ATT&amp;CK for ICS</strong></td>
+<td>N/A — Observational Gap</td>
+</tr>
+<tr>
+<td><strong>Risk Rationale</strong></td>
+<td>Without centralized event forwarding, detection of intrusions or post-incident root-cause investigation is severely impeded.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Observed Telemetry Evidence:</strong></p>
+<blockquote>
+<p>Zero syslog (UDP/TCP 514) or encrypted event forwarding observed from SCADA servers, HMIs, or managed switches in the captured span.</p>
+</blockquote>
+<p><strong>Recommended Action:</strong></p>
+<blockquote>
+<p>Request collector configuration, endpoint logging settings, and retention policies from plant IT/OT engineering before determining a compliance gap. If centralized logging is absent, deploy an OT-compatible log aggregator or SIEM forwarder in the Industrial DMZ (L3.5) with NTP synchronization.</p>
+</blockquote>
+<h3>Finding 10 — 🟡 MEDIUM: Cleartext SNMP polling traffic observed — verify community strings</h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>IEC 62443 Control</strong></td>
+<td>SR 1.3 — Account Management &amp; Credential Protection</td>
+</tr>
+<tr>
+<td><strong>Severity</strong></td>
+<td>MEDIUM</td>
+</tr>
+<tr>
+<td><strong>Evidence Confidence</strong></td>
+<td>High (Observed in packet trace)</td>
+</tr>
+<tr>
+<td><strong>Validation Status</strong></td>
+<td>Observed in telemetry</td>
+</tr>
+<tr>
+<td><strong>Target Security Level</strong></td>
+<td>Zone-dependent (Evaluated against IEC 62443-3-3:2018 Technical Requirements)</td>
+</tr>
+<tr>
+<td><strong>NIST SP 800-82 Reference</strong></td>
+<td>NIST SP 800-82 Rev. 3 §6.2.1 (Identification and Authentication)</td>
+</tr>
+<tr>
+<td><strong>MITRE ATT&amp;CK for ICS</strong></td>
+<td>T0888 — Remote System Information Discovery</td>
+</tr>
+<tr>
+<td><strong>Risk Rationale</strong></td>
+<td>SNMPv1/v2c transmits community strings in cleartext; standard strings allow reconnaissance of switch port states and network topologies.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Observed Telemetry Evidence:</strong></p>
+<blockquote>
+<p>Observed SNMP (UDP 161) polling traffic across 1 session(s).</p>
+</blockquote>
+<p><strong>Recommended Action:</strong></p>
+<blockquote>
+<p>Verify that default community strings ('public', 'private') are not in use. Migrate network devices to SNMPv3 with authentication and privacy (authPriv). If SNMP is unused, disable the service.</p>
+</blockquote>
+<h3>Finding 11 — 🔵 INFO: Baseline process control write operations observed (Subject to plant verification)</h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>IEC 62443 Control</strong></td>
+<td>SR 2.1 — Authorization Enforcement</td>
+</tr>
+<tr>
+<td><strong>Severity</strong></td>
+<td>INFO</td>
+</tr>
+<tr>
+<td><strong>Evidence Confidence</strong></td>
+<td>High (Observed in packet trace)</td>
+</tr>
+<tr>
+<td><strong>Validation Status</strong></td>
+<td>Observed in telemetry — Baseline profile</td>
+</tr>
+<tr>
+<td><strong>Target Security Level</strong></td>
+<td>Zone-dependent (Evaluated against IEC 62443-3-3:2018 Technical Requirements)</td>
+</tr>
+<tr>
+<td><strong>NIST SP 800-82 Reference</strong></td>
+<td>NIST SP 800-82 Rev. 3 §6.2.2 (Access Control)</td>
+</tr>
+<tr>
+<td><strong>MITRE ATT&amp;CK for ICS</strong></td>
+<td>T0831 — Manipulate I&amp;C</td>
+</tr>
+<tr>
+<td><strong>Risk Rationale</strong></td>
+<td>Expected operational control traffic; document as baseline profile.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Observed Telemetry Evidence:</strong></p>
+<blockquote>
+<p>Detected 3 distinct write-bearing command function codes between authorized engineering/SCADA stations and controllers (e.g. SCADA polling writes, PLC-to-VFD speed reference updates). Observed activity matches normal plant supervisory control patterns.</p>
+</blockquote>
+<p><strong>Recommended Action:</strong></p>
+<blockquote>
+<p>Confirm during site verification that all observed write function codes correspond to approved SCADA tag databases and operational setpoint ranges.</p>
+</blockquote>
+<hr />
+<h2>5. Remediation Roadmap</h2>
+<blockquote>
+<p><strong>Costing &amp; Implementation Note</strong>: All priority actions assume no additional software licence or hardware costs
+unless hardware acquisition is explicitly noted. Site engineering, regression testing, operational walkdowns,
+and change validation efforts are excluded and must be planned within plant turnaround schedules.</p>
+</blockquote>
+<p>Prioritised by operational risk and implementation constraints:</p>
+<table>
+<thead>
+<tr>
+<th>Priority</th>
+<th>Action</th>
+<th>Operational Effort</th>
+<th>Estimated Capital Cost</th>
+<th>Target Timeline</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>🔴 P1</td>
+<td>Conduct urgent engineering walkdown to validate unidentified endpoints (<code>10.20.30.99</code>, <code>172.16.5.40</code>). If unauthorized, agree containment and port isolation with plant owner</td>
+<td>1-2 days validation</td>
+<td>₹0 (Operational walkdown)</td>
+<td>Urgent validation &amp; plant-approved change window</td>
+</tr>
+<tr>
+<td>🔴 P1</td>
+<td>Inspect TCP/23 (Telnet) usage on M580 controller; verify vendor engineering tool requirements and restrict external Telnet traffic at switch ACL</td>
+<td>Low (1-2 days)</td>
+<td>₹0 (ACL configuration)</td>
+<td>Next maintenance window</td>
+</tr>
+<tr>
+<td>🔴 P1</td>
+<td>Review TCP/445 (SMB) dependency between IT and SCADA hosts; apply conduit filtering at boundary firewall</td>
+<td>Low (1 day)</td>
+<td>₹0 (Firewall rule)</td>
+<td>Next maintenance window</td>
+</tr>
+<tr>
+<td>🟠 P2</td>
+<td>Implement OT zone segmentation (L1/L2/L3 VLANs and IDMZ between L4 IT and L3 Operations per NIST SP 800-82 Rev. 3 §5.1 &amp; §5.2)</td>
+<td>High (2-4 weeks)</td>
+<td>₹2–6L (Industrial switch/firewall configuration)</td>
+<td>30–60 days</td>
+</tr>
+<tr>
+<td>🟠 P2</td>
+<td>Deploy Modbus deep-packet-inspection firewall / gateway allowlist to permit only expected master-to-slave commands</td>
+<td>Medium (1-2 weeks)</td>
+<td>₹1–3L (Hardware appliance / DPI module)</td>
+<td>30 days</td>
+</tr>
+<tr>
+<td>🟠 P2</td>
+<td>Enforce OPC-UA MessageSecurityMode SignAndEncrypt (Disable SecurityPolicy#None for production tags)</td>
+<td>Medium (3 days)</td>
+<td>₹0 (Software configuration)</td>
+<td>14 days</td>
+</tr>
+<tr>
+<td>🟠 P2</td>
+<td>Restrict HART-IP field gateway communication via dedicated conduit ACL allowlist to authorized supervisory controllers</td>
+<td>Medium (1 week)</td>
+<td>₹0 (Switch ACL configuration)</td>
+<td>14 days</td>
+</tr>
+<tr>
+<td>🟡 P3</td>
+<td>Upgrade SNMP community strings to SNMPv3 authPriv across all managed network switches and gateways</td>
+<td>Medium (3 days)</td>
+<td>₹0 (Switch configuration)</td>
+<td>30 days</td>
+</tr>
+<tr>
+<td>🟡 P3</td>
+<td>Deploy central OT Syslog aggregator in Industrial DMZ (L3.5) with NTP synchronisation</td>
+<td>Medium (1 week)</td>
+<td>₹50K–2L (Collector server / SIEM connector)</td>
+<td>60 days</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>6. Appendix — Observed OT Communication Sessions (15 Sessions Analyzed)</h2>
+<p>Complete list of communication flows observed during passive capture (reconciles with total packet count):</p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Source</th>
+<th>Destination</th>
+<th>Protocol</th>
+<th>Packets</th>
+<th>Write Operation?</th>
+<th>Control Context</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>10.20.30.10:50120</code></td>
+<td><code>10.20.10.11:502</code></td>
+<td>Modbus TCP</td>
+<td>110,000</td>
+<td>⚠️ YES (Write)</td>
+<td>SCADA Server Polling / Setpoint Write (M580 Kiln)</td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>10.20.30.10:50121</code></td>
+<td><code>10.20.10.12:502</code></td>
+<td>Modbus TCP</td>
+<td>45,000</td>
+<td>No (Read-Only)</td>
+<td>SCADA Server Polling (M580 Clinker Cooler)</td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>10.20.30.10:50122</code></td>
+<td><code>10.20.10.21:502</code></td>
+<td>Modbus TCP</td>
+<td>55,000</td>
+<td>⚠️ YES (Write)</td>
+<td>SCADA Server Polling / Setpoint Write (M580 Raw Mill)</td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>10.20.30.10:50123</code></td>
+<td><code>10.20.10.31:502</code></td>
+<td>Modbus TCP</td>
+<td>35,000</td>
+<td>No (Read-Only)</td>
+<td>SCADA Server Polling (M580 Cement Mill)</td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>10.20.30.10:50124</code></td>
+<td><code>10.20.10.41:502</code></td>
+<td>Modbus TCP</td>
+<td>20,000</td>
+<td>No (Read-Only)</td>
+<td>SCADA Server Polling (M340 Packing Plant)</td>
+</tr>
+<tr>
+<td>6</td>
+<td><code>10.20.10.11:49100</code></td>
+<td><code>10.20.10.101:502</code></td>
+<td>Modbus TCP</td>
+<td>18,200</td>
+<td>⚠️ YES (Write)</td>
+<td>Expected Process Baseline: Kiln PLC → Kiln VFD speed control</td>
+</tr>
+<tr>
+<td>7</td>
+<td><code>10.20.30.99:59100</code></td>
+<td><code>10.20.10.41:502</code></td>
+<td>Modbus TCP</td>
+<td>4,500</td>
+<td>⚠️ YES (Write)</td>
+<td>⚠️ Unregistered Dispatch PC → Packing PLC (Requires investigation)</td>
+</tr>
+<tr>
+<td>8</td>
+<td><code>10.20.30.50:49800</code></td>
+<td><code>10.20.10.11:502</code></td>
+<td>Modbus UMAS (Schneider FC90)</td>
+<td>42,000</td>
+<td>⚠️ YES (Write)</td>
+<td>Engineering Workstation (Control Expert) Program Upload / Diagnostic</td>
+</tr>
+<tr>
+<td>9</td>
+<td><code>10.20.20.15:54840</code></td>
+<td><code>10.20.30.10:4840</code></td>
+<td>OPC-UA</td>
+<td>82,100</td>
+<td>No (Read-Only)</td>
+<td>Central Control Room HMI ↔ SCADA Server Telemetry Feed</td>
+</tr>
+<tr>
+<td>10</td>
+<td><code>10.20.30.10:55094</code></td>
+<td><code>10.20.10.150:5094</code></td>
+<td>HART-IP (Yokogawa / Emerson)</td>
+<td>24,800</td>
+<td>⚠️ YES (Write)</td>
+<td>SCADA Server Polling Gas Analyzer Gateway</td>
+</tr>
+<tr>
+<td>11</td>
+<td><code>10.20.10.41:44818</code></td>
+<td><code>10.20.10.21:44818</code></td>
+<td>EtherNet/IP / CIP (Rockwell)</td>
+<td>18,400</td>
+<td>No (Read-Only)</td>
+<td>Packing Plant PLC ↔ Raw Mill Interlock Signaling</td>
+</tr>
+<tr>
+<td>12</td>
+<td><code>10.20.30.10:49200</code></td>
+<td><code>10.20.10.31:20000</code></td>
+<td>DNP3</td>
+<td>16,620</td>
+<td>No (Read-Only)</td>
+<td>Substation Power Monitor Telemetry Polling</td>
+</tr>
+<tr>
+<td>13</td>
+<td><code>10.20.30.10:50161</code></td>
+<td><code>10.20.10.11:161</code></td>
+<td>SNMP</td>
+<td>31,200</td>
+<td>No (Read-Only)</td>
+<td>Network Health &amp; Switch Port MIB-II Polling</td>
+</tr>
+<tr>
+<td>14</td>
+<td><code>172.16.5.40:51234</code></td>
+<td><code>10.20.10.11:23</code></td>
+<td>TCP/23 (Potential Telnet)</td>
+<td>340</td>
+<td>Not determined</td>
+<td>⚠️ External Vendor Subnet → Kiln PLC (Cleartext Remote Access Heuristic)</td>
+</tr>
+<tr>
+<td>15</td>
+<td><code>10.20.30.99:49445</code></td>
+<td><code>10.20.30.10:445</code></td>
+<td>TCP/445 (Potential SMB)</td>
+<td>850</td>
+<td>Not determined</td>
+<td>⚠️ Unregistered Dispatch PC → SCADA Server (File Sharing Heuristic)</td>
+</tr>
+</tbody>
+</table>
+<p><em>Total Reconciled Frames in Appendix: 504,010</em></p>
+<hr />
+<p><em>Demonstration report generated by <strong>IndusProbe v1.1-demonstrator</strong> — Industrial OT Passive Scanner &amp; IEC 62443 Analyser</em>
+<em>Notice: Synthetic dataset for technology demonstration purposes only.</em></p>
+
+</body>
+</html>

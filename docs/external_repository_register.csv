@@ -1,0 +1,21 @@
+Local Path,Actual Git Remote URL,Resolved Upstream URL,Commit SHA,Branch / Tag,Dirty Working Tree Status,Submodules,Licence Files at Checked-out Commit,Source Copied into IndusProbe,Usage Classification
+EmbedXPL-Forge,https://github.com/mrhenrike/EmbedXPL-Forge,https://github.com/mrhenrike/EmbedXPL-Forge,c959f1820ec2d3a24c45de98d338454a2c18dc0f,main,CLEAN,NONE,LICENSE,NO,Unused
+GasPot,https://github.com/sjhilt/GasPot.git,https://github.com/sjhilt/GasPot,ee33885f825dbf889c8934833bfdeac92d2ab69b,master,CLEAN,NONE,LICENSE.md,NO,Unused
+ICS-Cybersecurity-Audit,https://github.com/frangelbarrera/ICS-Cybersecurity-Audit,https://github.com/frangelbarrera/ICS-Cybersecurity-Audit,9037c6adf6862d4d5e68a1493b11dd5f140f7a74,main,CLEAN,NONE,LICENSE,NO (Referenced in README.md as framework inspiration),Documentation/reference
+ICS-Security-Tools,https://github.com/iti/ICS-Security-Tools.git,https://github.com/iti/ICS-Security-Tools,bcb93ee1cdf395a457cc08f639cf29aab5975f01,master,CLEAN,NONE,LICENSE.md,NO,Unused
+IndusProbe/external_repos/profinet,https://github.com/devkid/profinet.git,https://github.com/devkid/profinet,ffaae64ad43323f9820cccc38523529b31347f72,master,CLEAN,NONE,NONE,NO (Custom profinet.py implemented independently),Unused
+IndusProbe/external_repos/pycomm3,https://github.com/ottowillems/pycomm3.git,https://github.com/ottowillems/pycomm3,NO_COMMIT,NONE,CLEAN,NONE,NONE,NO,Unused (Empty repository checkout)
+IndusProbe/external_repos/pylogix,https://github.com/dmroeder/pylogix.git,https://github.com/dmroeder/pylogix,193b6c7b0c601619223ee53587abd821d3b344c1,master,CLEAN,NONE,LICENSE.txt,NO,Unused
+IndusProbe/external_repos/zeek-plugin-profinet,https://github.com/amzn/zeek-plugin-profinet.git,https://github.com/amzn/zeek-plugin-profinet,977f8be907d648d8bb45c9d3dd2aa1701c3cfa5d,master,CLEAN,NONE,LICENSE,NO,Unused
+Industrial-Cybersecurity-2nd-Edition,https://github.com/SackOfHacks/Industrial-Cybersecurity-2nd-Edition,https://github.com/SackOfHacks/Industrial-Cybersecurity-2nd-Edition,f20b4f24665ca76fdaab7cffb4e6ecc1e223b808,main,CLEAN,NONE,LICENSE,NO,Documentation/reference
+LICSTER,https://github.com/thainnos/LICSTER.git,https://github.com/thainnos/LICSTER,93b6b7deaa06b89ea644bdeb1ab6da5835b4ae15,master,DIRTY (1 modified file),NONE,LICENSE.md,NO,Unused
+OT_Security_OnePagers,https://github.com/SackOfHacks/OT_Security_OnePagers,https://github.com/SackOfHacks/OT_Security_OnePagers,414b90362d12718f2ac0fe37c78bfee17bfcde6a,main,CLEAN,NONE,LICENSE,NO (Referenced in README.md as protocol knowledge base),Documentation/reference
+OneAlert,https://github.com/mangod12/OneAlert,https://github.com/mangod12/OneAlert,4f04de556d88f33dba40668e97640377ddf8b961,main,CLEAN,NONE,License,NO (Output format aligned via onealert_bridge.py),Alert ingestion / Output format target
+awesome-industrial-control-system-security,https://github.com/hslatman/awesome-industrial-control-system-security.git,https://github.com/hslatman/awesome-industrial-control-system-security,ecb50861a4bcd9eb7b02c5ef3817d315e1da94cb,main,CLEAN,NONE,LICENSE,NO,Documentation/reference
+awesome-ot-security,https://github.com/cyber-ranger/awesome-ot-security.git,https://github.com/cyber-ranger/awesome-ot-security,5882dafbeaca2093ea43d8c0f068f962fefb8263,master,CLEAN,NONE,LICENSE.md,NO,Documentation/reference
+conpot,https://github.com/mushorg/conpot.git,https://github.com/mushorg/conpot,f5a92d1b0811289465e8b1dea8e7cf5fbf3eaed6,main,CLEAN,NONE,LICENSE.txt,NO,Unused
+ics-iot-ot-hardening,https://github.com/SiteQ8/ics-iot-ot-hardening,https://github.com/SiteQ8/ics-iot-ot-hardening,d723c8094d46b2f5c20888d14a21107401a096e8,main,CLEAN,NONE,LICENSE,NO (Referenced in README.md as remediation guidance),Documentation/reference
+industrial-scanner,https://github.com/frangelbarrera/industrial-scanner,https://github.com/frangelbarrera/industrial-scanner,ff2e2be0aa16d84912b0960b5377c608e4618829,main,CLEAN,NONE,LICENSE,NO (PCAP sample files read by otforge_test.py),Test/PCAP asset provider
+labshock,https://github.com/zakharb/labshock.git,https://github.com/zakharb/labshock,bf66800ce2ee591b2a8d7800d941f23560ca0969,main,CLEAN,NONE,LICENSE,NO,Unused
+otforge,https://github.com/iburres/otforge,https://github.com/iburres/otforge,e87fe3d51a12adbdc2dc6958bed5b2a6e96a472d,main,CLEAN,NONE,LICENSE,NO (Used only as a metadata string label in CLI/reports),Documentation/reference
+

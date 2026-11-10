@@ -1,0 +1,48 @@
+test_ACC01_vendor_mismatch_returns_none (tests.test_advisory_matcher.TestAcceptance) ... ok
+test_ACC02_no_model_insufficient_identity (tests.test_advisory_matcher.TestAcceptance) ... ok
+test_ACC03_keyword_miss_no_rule_found (tests.test_advisory_matcher.TestAcceptance) ... ok
+test_ACC04_product_match_firmware_unknown (tests.test_advisory_matcher.TestAcceptance) ... ok
+test_ACC05_product_match_affected_version (tests.test_advisory_matcher.TestAcceptance) ... ok
+test_ACC06_product_match_patched_version (tests.test_advisory_matcher.TestAcceptance) ... ok
+test_ACC07_not_affected_has_disclaimer (tests.test_advisory_matcher.TestAcceptance) ... ok
+test_ACC08_all_versions_affected (tests.test_advisory_matcher.TestAcceptance) ... ok
+test_ACC09_rockwell_controllogix_affected (tests.test_advisory_matcher.TestAcceptance) ... ok
+test_ACC10_rockwell_controllogix_patched (tests.test_advisory_matcher.TestAcceptance) ... ok
+test_ACC11_ambiguous_version_string (tests.test_advisory_matcher.TestAcceptance) ... ok
+test_ACC12_software_name_match (tests.test_advisory_matcher.TestAcceptance) ... ok
+test_ACC13_no_rules_returns_empty (tests.test_advisory_matcher.TestAcceptance) ... No applicability rules found in DB. Ingest advisories first.
+ok
+test_ACC14_multi_asset_multi_rule (tests.test_advisory_matcher.TestAcceptance) ... ok
+test_ACC15_negative_result_not_global_clean (tests.test_advisory_matcher.TestAcceptance)
+Verifies that the system's NOT_AFFECTED and NO_APPLICABLE_RULE_FOUND ... ok
+test_REG01A_m580_unknown_firmware (tests.test_advisory_matcher.TestReg01CVE20207537)
+CRITICAL: M580 with unknown firmware must NOT return NO_APPLICABLE_RULE_FOUND. ... ok
+test_REG01B_m340_firmware_lt_boundary (tests.test_advisory_matcher.TestReg01CVE20207537)
+M340 with BMXP34 SV3.20 is strictly less than boundary SV3.30. ... ok
+test_REG01C_altivar_drive_not_in_product_tree (tests.test_advisory_matcher.TestReg01CVE20207537)
+Altivar drives are variable-speed drives, NOT PLCs. ... ok
+test_REG01D_m340_patched_firmware (tests.test_advisory_matcher.TestReg01CVE20207537)
+M340 with BMXP34 SV3.30 (the patched boundary) → NOT_AFFECTED_PER_ADVISORY. ... ok
+test_REG02A_control_expert_v141_affected (tests.test_advisory_matcher.TestReg02CVE202122779)
+EcoStruxure Control Expert v14.1 < 15.0 SP1 → AFFECTED_PER_ADVISORY. ... ok
+test_REG02B_m580_all_versions_affected (tests.test_advisory_matcher.TestReg02CVE202122779)
+SEVD-2021-194-01 product_id=8 marks M580 CPU as affected in ALL versions. ... ok
+test_REG02C_m580_unknown_firmware_version_lt_rule (tests.test_advisory_matcher.TestReg02CVE202122779)
+Rule with version_lt bound + asset with no firmware → PRODUCT_MATCH_VERSION_UNKNOWN. ... ok
+test_REG03_yokogawa_centum_no_applicable_rule (tests.test_advisory_matcher.TestReg03CVE201810620)
+A Yokogawa CENTUM VP gateway must return NO_APPLICABLE_RULE_FOUND ... ok
+test_VER01_schneider_sv_older_less (tests.test_advisory_matcher.TestVersionComparator) ... ok
+test_VER02_schneider_sv_equal (tests.test_advisory_matcher.TestVersionComparator) ... ok
+test_VER03_schneider_sv_newer_greater (tests.test_advisory_matcher.TestVersionComparator) ... ok
+test_VER04_schneider_sp_version (tests.test_advisory_matcher.TestVersionComparator) ... ok
+test_VER05_schneider_sp_equal (tests.test_advisory_matcher.TestVersionComparator) ... ok
+test_VER06_rockwell_leading_zeros (tests.test_advisory_matcher.TestVersionComparator) ... ok
+test_VER07_rockwell_major_version (tests.test_advisory_matcher.TestVersionComparator) ... ok
+test_VER08_ambiguous_raises (tests.test_advisory_matcher.TestVersionComparator) ... ok
+test_VER09_exact_only_equal (tests.test_advisory_matcher.TestVersionComparator) ... ok
+test_VER10_exact_only_not_equal_raises (tests.test_advisory_matcher.TestVersionComparator) ... ok
+
+----------------------------------------------------------------------
+Ran 33 tests in 0.099s
+
+OK

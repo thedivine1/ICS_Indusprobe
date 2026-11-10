@@ -1,0 +1,74 @@
+# IndusProbe — Git Ignore Rules
+# Applied BEFORE git initialization as per implementation_plan.md commitment
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+.venv/
+venv/
+env/
+.env
+
+# --- Advisory module runtime data ---
+# Never commit advisory DB, raw advisory archive, or generated reports to git
+data/advisories.db
+data/advisories.db-wal
+data/advisories.db-shm
+data/archive/
+
+# --- Generated reports ---
+reports/*.pdf
+reports/*.html
+reports/*.md
+reports/*.csv
+reports/*.json
+reports/onealert_assets.json
+reports/onealert_eve_events.jsonl
+
+# --- PCAP files — NEVER commit captured traffic ---
+*.pcap
+*.pcapng
+*.cap
+
+# --- Sensitive / customer data ---
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+*_secrets.*
+*_credentials.*
+customer_inventory*.csv
+customer_inventory*.json
+
+# --- macOS ---
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# --- Editor ---
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# --- Test artifacts ---
+.pytest_cache/
+htmlcov/
+.coverage
+coverage.xml
+*.cover
+
+# --- Logs ---
+*.log
+indus_probe.log
+

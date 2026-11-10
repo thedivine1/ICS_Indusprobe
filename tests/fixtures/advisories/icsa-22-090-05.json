@@ -1,0 +1,69 @@
+{
+  "document": {
+    "title": "ICSA-22-090-05 — Rockwell Automation ControlLogix / GuardLogix Unauthenticated Bytecode Modification",
+    "tracking": {
+      "id": "ICSA-22-090-05",
+      "initial_release_date": "2022-03-31",
+      "current_release_date": "2022-04-14"
+    }
+  },
+  "product_tree": {
+    "branches": [
+      {
+        "category": "vendor",
+        "name": "Rockwell Automation",
+        "branches": [
+          {
+            "category": "product_family",
+            "name": "ControlLogix 5580",
+            "branches": [
+              {
+                "category": "product_version_range",
+                "name": "All versions prior to v33.011",
+                "product": {
+                  "product_id": "R1",
+                  "name": "ControlLogix 5580 — Firmware versions prior to v33.011"
+                }
+              }
+            ]
+          },
+          {
+            "category": "product_family",
+            "name": "GuardLogix 5580",
+            "branches": [
+              {
+                "category": "product_version_range",
+                "name": "All versions prior to v33.011",
+                "product": {
+                  "product_id": "R2",
+                  "name": "GuardLogix 5580 — Firmware versions prior to v33.011"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "vulnerabilities": [
+    {
+      "cve": "CVE-2022-1161",
+      "title": "Unauthenticated Bytecode Modification / Execution Vulnerability",
+      "product_status": {
+        "known_affected": ["R1", "R2"]
+      },
+      "scores": [
+        {
+          "source": "CISA",
+          "cvss_v3": {
+            "baseScore": 10.0,
+            "version": "3.1",
+            "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H"
+          }
+        }
+      ]
+    }
+  ],
+  "_fixture_note": "SYNTHETIC FIXTURE for offline testing. Based on official CISA CSAF advisory ICSA-22-090-05 verified at SHA-256 da22c37a. Version strings reproduced verbatim from official advisory. NOT authoritative — retrieve from https://raw.githubusercontent.com/cisagov/CSAF/develop/csaf/white/2022/icsa-22-090-05.json"
+}
+
